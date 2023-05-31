@@ -1,0 +1,3204 @@
+<html class="js flexbox canvas canvastext webgl no-touch geolocation postmessage websqldatabase indexeddb hashchange history draganddrop websockets rgba hsla multiplebgs backgroundsize borderimage borderradius boxshadow textshadow opacity cssanimations csscolumns cssgradients cssreflections csstransforms csstransforms3d csstransitions fontface generatedcontent video audio localstorage sessionstorage webworkers no-applicationcache svg inlinesvg smil svgclippaths k-webkit k-webkit114" style=""><head>
+<meta content="width=device-width" name="viewport"/>
+<title>
+        MSC -- Procedimientos
+    </title>
+<link href="/Aplicaciones/NCFE/Concursos/Content/css/kendo/kendo.common-bootstrap.min.css" rel="stylesheet"/>
+<link href="/Aplicaciones/NCFE/Concursos/Content/css/kendo/kendo.bootstrap.min.css" rel="stylesheet"/>
+<script async="" src="https://ssl.google-analytics.com/ga.js" type="text/javascript"></script><script src="/Aplicaciones/NCFE/Concursos/Scripts/SweetAlert/dist/sweetalert.min.js"></script>
+<link href="/Aplicaciones/NCFE/Concursos/Content/css/SweetAlert/sweetalert.css" rel="stylesheet"/>
+<script src="/Aplicaciones/NCFE/Concursos/Scripts/Modal/VentanaModal.js"></script>
+<link href="/Aplicaciones/NCFE/Concursos/Content/css/Modal/VentanaModal.css" rel="stylesheet"/>
+<script src="/Aplicaciones/NCFE/Concursos/boilerplate?v=gmR-c_VmV49l5mjL4yW37SZCBXIIWtrfmzyRBaMrEDc1"></script>
+<script src="/Aplicaciones/NCFE/Concursos/SeguriData?v=GLqQiVkKy5p-AFrc9eMwJthjMESQ2Z6mFBMEidyN2L41"></script>
+<link href="/Aplicaciones/NCFE/Concursos/Content/css/boilerplate?v=Cvs9e4xWwmvMugyS-0YU2nGr-Aerv92fnwDMJq5hST81" rel="stylesheet"/>
+<script src="/Aplicaciones/NCFE/Concursos/Scripts/kendo/kendo.all.min.js"></script>
+<script type="text/javascript">
+        var $jq1 = jQuery.noConflict(true);
+        var appAdmin = appAdmin || {};
+        appAdmin.Urls = appAdmin.Urls || {};
+        appAdmin.Urls.baseUrl = '/Aplicaciones/NCFE/Concursos/';
+    </script>
+<style>
+        table.fixed {
+            table-layout: fixed;
+            word-break: break-all;
+        }
+
+            table.fixed td {
+                overflow: hidden;
+            }
+
+        .trHead {
+            color: black;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .derecha {
+            text-align: right;
+        }
+    </style>
+<style id="fit-vids-style">.fluid-width-video-wrapper{width:100%;position:relative;padding:0;}.fluid-width-video-wrapper iframe,.fluid-width-video-wrapper object,.fluid-width-video-wrapper embed {position:absolute;top:0;left:0;width:100%;height:100%;}</style></head>
+<body class="device-lg">
+<script type="text/javascript">
+            var autenticadoExtranjero = false;
+            var userName;
+            var idProveedorFirmado;
+            var tipoPersona;
+            var extranjero;
+            var certificado;
+            var subcontrata;
+            var utilizarSesion;
+            var userApiPath = '/Aplicaciones/NCFE/Concursos/User/validaSesionActivo';
+            var userApiPathValorSesion = '/Aplicaciones/NCFE/Concursos/User/getValorSession';
+            var count = 0;
+            var sessionTimeout = 0;
+            var segundos = 0;
+            var BanderaMensaje = 0;
+            var timersSesion;
+
+            $jq1(document).ready(function () {
+                kendo.culture("es-MX");
+                var navigator = get_browser();
+
+                switch (navigator.name) {
+                    case "Chrome":
+                        if (navigator.version < 51) {
+                            MostrarMensajeAdvertencia("¡Navegador Incompatible!", "Esta usando una versión de Google Chrome no compatible con la funcionalidad del sitio, le recomendamos actualizar a la versión mas reciente ya que podría no trabajar correctamente");
+                        }
+                        break;
+                    case "Firefox":
+                        if (navigator.version < 47) {
+                            MostrarMensajeAdvertencia("¡Navegador Incompatible!", "Esta usando una versión de Firefox no compatible con la funcionalidad del sitio, le recomendamos actualizar a la versión mas reciente ya que podría no trabajar correctamente");
+                        }
+                        break;
+                    default:
+                        MostrarMensajeAdvertencia("¡Navegador Incompatible!", "No se ha podido identificar el navegador desde el cual esta accediendo, para utilizar esta página se recomienda alguno de estos navegadores: Google Chrome o Mozilla Firefox");
+                }
+
+                $jq1("#userRegistrado").css("display", "none");
+                $jq1("#userNoVigente").css("display", "none");
+                $jq1("#userVigente").css("display", "none");
+                $jq1("#userRevision").css("display", "none");
+
+                $jq1("#Cerrar").click(function () {
+                    CerrarSesionActiva();
+                });
+            });
+
+            function validaUsuarioLogueado() {
+                var userApiPath2 = '/Aplicaciones/NCFE/Concursos/User/validaSesionActivo';
+
+                var form = $('#__AjaxAntiForgeryForm');
+                var token = $('input[name="__RequestVerificationToken"]', form).val();
+
+                return $jq1.ajax({
+                    url: userApiPath2,
+                    data: {
+                        __RequestVerificationToken: token,
+                    },
+                    cache: false,
+                    type: "POST",
+                    dataType: 'json',
+                    async: false,
+                    error: function (e, errStatus, errorThrown) {
+                        MostrarMensajeError("¡Error!", "Ocurrió un error: " + errorThrown);
+                    }
+                });
+            }
+
+            function getValorSesion(nombreSesion) {
+                var userApiPathValorSesionProc = '/Aplicaciones/NCFE/Concursos/User/getValorSession';
+                return $jq1.ajax({
+                    url: userApiPathValorSesionProc,
+                    data: {
+                        __RequestVerificationToken: token,
+                        nombreSesion: nombreSesion
+                    },
+                    cache: false,
+                    type: "POST",
+                    dataType: 'json',
+                    error: function (e, errStatus, errorThrown) {
+                        MostrarMensajeError("¡Error!", "Ocurrió un error: " + errorThrown);
+                    },
+                    success: function (result) {
+                        if (result.ProcesoExitoso == 0) {
+                            MostrarMensajeError("¡Error!", result.Mensaje);
+                            setTimeOut(function () {
+                                CerrarSesionActiva();
+                            }, 1000);
+                        }
+                    }
+                });
+            }
+
+            function obtenerProveedorPorId(idproveedor) {
+                var fecha;
+                var hoy = new Date();
+                $jq1.ajax({
+                    url: appAdmin.Urls.baseUrl + "Proveedores/ObtenerInformacionProveedor",
+                    data: {
+                        __RequestVerificationToken: token,
+                        idProveedor: idproveedor
+                    },
+                    cache: false,
+                    async: false,
+                    type: "POST",
+                    error:
+                    function (e, errStatus, errorThrown) {
+                        OcultaCargando();
+                        MostrarMensajeError("¡Error!", "Ocurrió un error");
+                    },
+                    success: function (result) {
+                        certificado = result.Objeto.IdEstatusProveedor;
+                        autenticadoExtranjero = result.Objeto.EsExtranjero;
+
+                        if (certificado == 1) {
+                            $jq1("#btnCertificar").show();
+                            $jq1("#btnRenovar").hide();
+                            $jq1("#lblEstatusProveedor").text("Inscrito");
+                            $jq1("#lblDesdeHasta").text("Desde");
+                            $jq1("#lblFechaEstatusGeneral").text(result.Objeto.FechaAltaST);
+                        }
+                        if (certificado == 2) {
+                            $jq1("#btnCertificar").hide();
+                            $jq1("#btnRenovar").hide();
+                            if (result.Objeto.FechaRevisionCertificacion != null) {
+                                $jq1("#lblEstatusProveedor").text("En Revisión para Registro");
+                                $jq1("#lblDesdeHasta").text("Desde");
+                                $jq1("#lblFechaEstatusGeneral").text(result.Objeto.FechaRevisionCertificacionST);
+                            }
+                            else {
+                                $jq1("#lblEstatusProveedor").text("En Revisión para Registro");
+                                $jq1("#lblDesdeHasta").text("Desde");
+                                $jq1("#lblFechaEstatusGeneral").text(result.Objeto.FechaCertificacionST);
+                            }
+                        }
+                        if (certificado == 3) {
+                            $jq1("#lblEstatusProveedor").text("Registro Vigente");
+                            $jq1("#lblDesdeHasta").text("Hasta");
+                            $jq1("#lblFechaEstatusGeneral").text(result.Objeto.FechaVigenciaST);
+                            $jq1("#lnkConstancia").show();
+                        }
+                        if (certificado == 4) {
+                            $jq1("#btnCertificar").hide();
+                            $jq1("#btnRenovar").hide();
+                            $jq1("#lblEstatusProveedor").text("No Vigente");
+                            $jq1("#lblDesdeHasta").text("Desde");
+                            $jq1("#lblFechaEstatusGeneral").text(result.Objeto.FechaModificacionST);
+                        }
+                        if (certificado == 5) {
+                            $jq1("#btnCertificar").hide();
+                            $jq1("#btnRenovar").hide();
+                            $jq1("#lblEstatusProveedor").text("Inhabilitado");
+                            $jq1("#lblDesdeHasta").text("Desde");
+                            $jq1("#lblFechaEstatusGeneral").text(result.Objeto.FechaModificacionST);
+                        }                       
+                        if (certificado == 6) {
+                            $jq1("#btnCertificar").hide();
+                            $jq1("#btnRenovar").hide();
+                            $jq1("#lblEstatusProveedor").text("En Corrección");
+                            $jq1("#lblDesdeHasta").text("Desde");
+                            $jq1("#lblFechaEstatusGeneral").text(result.Objeto.FechaCorreccionST);
+                        }
+                        if (certificado == 8) {
+                            $jq1("#btnCertificar").show();
+                            $jq1("#btnRenovar").hide();
+                            $jq1("#lblEstatusProveedor").text("No Vigente en Corrección");
+                            $jq1("#lblDesdeHasta").text("Desde");
+                            $jq1("#lblFechaEstatusGeneral").text(result.Objeto.FechaCorreccionST);
+                        }
+                        if (certificado == 9) {
+                            $jq1("#btnCertificar").hide();
+                            $jq1("#btnRenovar").hide();
+                            if (result.Objeto.FechaRevisionCertificacion != null) {
+                                $jq1("#lblEstatusProveedor").text("No Vigente en Revisión para Registro");
+                                $jq1("#lblDesdeHasta").text("Desde");
+                                $jq1("#lblFechaEstatusGeneral").text(result.Objeto.FechaRevisionCertificacionST);
+                            }
+                            else {
+                                $jq1("#lblEstatusProveedor").text("No Vigente en Revisión para Registro");
+                                $jq1("#lblDesdeHasta").text("Desde");
+                                $jq1("#lblFechaEstatusGeneral").text(result.Objeto.FechaCertificacionST);
+                            }
+                        }
+                        if (certificado == 10) {
+                            $jq1("#btnCertificar").show();
+                            $jq1("#btnRenovar").hide();
+                            $jq1("#lblEstatusProveedor").text("Registro Vigente Actualizado");
+                            $jq1("#lblDesdeHasta").text("Hasta");
+                            $jq1("#lblFechaEstatusGeneral").text(result.Objeto.FechaVigenciaST);
+                            $jq1("#lnkConstancia").show();
+                        }
+                        if (certificado == 11) {
+                            $jq1("#btnCertificar").hide();
+                            $jq1("#btnRenovar").hide();
+                            $jq1("#lblEstatusProveedor").text("Disposición 15");
+                            $jq1("#lblDesdeHasta").text("Desde");
+                            $jq1("#lblFechaEstatusGeneral").text(result.Objeto.FechaModificacionST);                            
+                        }
+                        certificado = result.Objeto.IdEstatusProveedor;
+                    }
+                });
+            }
+
+            function EstablecerProveedorPorObjeto(result) {
+                try {
+
+                    var fecha;
+                    var hoy = new Date();
+
+                    certificado = result.Objeto.IdEstatusProveedor;
+
+                    autenticadoExtranjero = result.Objeto.EsExtranjero;
+
+                    if (certificado == 1) {
+                        $jq1("#btnCertificar").show();
+                        $jq1("#btnRenovar").hide();
+                        $jq1("#lblEstatusProveedor").text("Inscrito");
+                        $jq1("#lblDesdeHasta").text("Desde");
+                        $jq1("#lblFechaEstatusGeneral").text(result.Objeto.FechaAltaST);
+                    }
+                    if (certificado == 2) {
+                        $jq1("#btnCertificar").hide();
+                        $jq1("#btnRenovar").hide();
+                        if (result.Objeto.FechaRevisionCertificacion != null) {
+                            $jq1("#lblEstatusProveedor").text("En Revisión para Registro");
+                            $jq1("#lblDesdeHasta").text("Desde");
+                            $jq1("#lblFechaEstatusGeneral").text(result.Objeto.FechaRevisionCertificacionST);
+                        }
+                        else {
+                            $jq1("#lblEstatusProveedor").text("En Revisión para Registro");
+                            $jq1("#lblDesdeHasta").text("Desde");
+                            $jq1("#lblFechaEstatusGeneral").text(result.Objeto.FechaCertificacionST);
+                        }
+                    }
+                    if (certificado == 3) {
+                        $jq1("#lblEstatusProveedor").text("Registro Vigente");
+                        $jq1("#lblDesdeHasta").text("Hasta");
+                        $jq1("#lblFechaEstatusGeneral").text(result.Objeto.FechaVigenciaST);
+                        $jq1("#lnkConstancia").show();
+                    }
+                    if (certificado == 4) {
+                        $jq1("#btnCertificar").hide();
+                        $jq1("#btnRenovar").hide();
+                        $jq1("#lblEstatusProveedor").text("No Vigente");
+                        $jq1("#lblDesdeHasta").text("Desde");
+                        $jq1("#lblFechaEstatusGeneral").text(result.Objeto.FechaModificacionST);
+                    }
+                    if (certificado == 5) {
+                        $jq1("#btnCertificar").hide();
+                        $jq1("#btnRenovar").hide();
+                        $jq1("#lblEstatusProveedor").text("Inhabilitado");
+                        $jq1("#lblDesdeHasta").text("Desde");
+                        $jq1("#lblFechaEstatusGeneral").text(result.Objeto.FechaModificacionST);
+                    }
+                    if (certificado == 6) {
+                        $jq1("#btnCertificar").hide();
+                        $jq1("#btnRenovar").hide();
+                        $jq1("#lblEstatusProveedor").text("En Corrección");
+                        $jq1("#lblDesdeHasta").text("Desde");
+                        $jq1("#lblFechaEstatusGeneral").text(result.Objeto.FechaCorreccionST);
+                    }
+                    if (certificado == 8) {
+                        $jq1("#btnCertificar").show();
+                        $jq1("#btnRenovar").hide();
+                        $jq1("#lblEstatusProveedor").text("No Vigente en Corrección");
+                        $jq1("#lblDesdeHasta").text("Desde");
+                        $jq1("#lblFechaEstatusGeneral").text(result.Objeto.FechaCorreccionST);
+                    }
+                    if (certificado == 9) {
+                        $jq1("#btnCertificar").hide();
+                        $jq1("#btnRenovar").hide();
+                        if (result.Objeto.FechaRevisionCertificacion != null) {
+                            $jq1("#lblEstatusProveedor").text("No Vigente en Revisión para Registro");
+                            $jq1("#lblDesdeHasta").text("Desde");
+                            $jq1("#lblFechaEstatusGeneral").text(result.Objeto.FechaRevisionCertificacionST);
+                        }
+                        else {
+                            $jq1("#lblEstatusProveedor").text("No Vigente en Revisión para Registro");
+                            $jq1("#lblDesdeHasta").text("Desde");
+                            $jq1("#lblFechaEstatusGeneral").text(result.Objeto.FechaCertificacionST);
+                        }
+                    }
+                    if (certificado == 10) {
+                        $jq1("#btnCertificar").show();
+                        $jq1("#btnRenovar").hide();
+                        $jq1("#lblEstatusProveedor").text("Registro Vigente Actualizado");
+                        $jq1("#lblDesdeHasta").text("Hasta");
+                        $jq1("#lblFechaEstatusGeneral").text(result.Objeto.FechaVigenciaST);
+                        $jq1("#lnkConstancia").show();
+                    }
+                    if (certificado == 11) {
+                        $jq1("#btnCertificar").hide();
+                        $jq1("#btnRenovar").hide();
+                        $jq1("#lblEstatusProveedor").text("Disposición 15");
+                        $jq1("#lblDesdeHasta").text("Desde");
+                        $jq1("#lblFechaEstatusGeneral").text(result.Objeto.FechaModificacionST);
+                        MostrarMensajeAdvertencia("Disposición 15","La CFE y sus Empresas Productivas Subsidiarias se abstendrán de considerar ofertas o celebrar contratos con los Proveedores/Contratistas que se encuentra en uno o varios de los supuestos de la Disposición 15");
+                    }
+                    certificado = result.Objeto.IdEstatusProveedor;
+
+                } catch (e) {
+                    MostrarMensajeError("¡Error!", e.message);
+                }
+            }
+
+            function validarArchivosExistentes(idProveedorFirmado) {
+                try {
+                    MuestraCargando();
+                    $jq1.ajax({
+                        url: appAdmin.Urls.baseUrl + "Proveedores/ObtenerArchivosFaltantes",
+                        data: {
+                            __RequestVerificationToken: token,
+                            IdProveedor: idProveedorFirmado
+                        },
+                        cache: false,
+                        type: "POST",
+                        error: function (e, errStatus, errorThrown) {
+                            OcultaCargando();
+                            MostrarMensajeError("¡Error!", errorThrown);
+                        },
+                        success: function (result) {
+                            if (result > 0) {
+                                MostrarMensajeAdvertencia("¡Documentación incompleta!", "Faltan documentos para revisión, favor de verificar.");
+                                OcultaCargando();
+                            } else {
+
+                                $jq1.ajax({
+                                    url: appAdmin.Urls.baseUrl + "Proveedores/ObtenerDatosFaltantes",
+                                    data: {
+                                        __RequestVerificationToken: token,
+                                        IdProveedor: idProveedorFirmado
+                                    },
+                                    cache: false,
+                                    type: "POST",
+                                    error: function (e, errStatus, errorThrown) {
+                                        OcultaCargando();
+                                        MostrarMensajeError("¡Error!", errorThrown);
+                                    },
+                                    success: function (result) {
+                                        if (result > 0) {
+                                            MostrarMensajeAdvertencia("¡Información incompleta!", "Es necesario capurar la información para su registro, favor de verificar.");
+                                            OcultaCargando();
+                                        } else {
+                                            updEstatuscertificacion(idProveedorFirmado, 2);
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    });
+                } catch (e) {
+                    MostrarMensajeError("¡Error!", "Ocurrió un error: " + e.message);
+                }
+            }
+
+            function updEstatuscertificacion(idProveedorFirmado, idEstatusP) {
+                $jq1.ajax({
+                    url: appAdmin.Urls.baseUrl + "Proveedores/updEstatuscertificacion",
+                    data: {
+                        __RequestVerificationToken: token,
+                        idProveedor: idProveedorFirmado,
+                        idEstatus: idEstatusP
+                    },
+                    type: "POST",
+                    error: function (e, errStatus, errorThrown) {
+                        OcultaCargando();
+                        MostrarMensajeError("¡Error!", errorThrown);
+                    },
+                    success: function (result) {
+                        var titulo;
+                        var texto;
+                        if (idEstatusP == 2) {
+                            titulo = "Documentación completa";
+                            texto = "Los documentos están en proceso de validación";
+                            $jq1("#lblEstatusProveedor").text("En Revisión para Registro");
+                            $jq1("#lblDesdeHasta").text("Desde");
+                            $jq1("#lblFechaEstatusGeneral").text(result);
+                            $jq1("#btnCertificar").hide();
+                            $jq1("#btnRenovar").hide();
+                        }
+                        MostrarMensajeExito(titulo, texto);
+                        OcultaCargando();
+                    }
+                });
+            }
+
+            function updEstatusRenovacion(idProveedorFirmado, idEstatusP) {
+                $jq1.ajax({
+                    url: appAdmin.Urls.baseUrl + "Proveedores/updEstatusRenovacion",
+                    data: {
+                        __RequestVerificationToken: token,
+                        idProveedor: idProveedorFirmado,
+                        idEstatus: idEstatusP
+                    },
+                    type: "POST",
+                    error: function (e, errStatus, errorThrown) {
+                        OcultaCargando();
+                        MostrarMensajeError("¡Error!", errorThrown);
+                    },
+                    success: function (result) {
+                        var titulo;
+                        var texto;
+                        if (idEstatusP == 3) {
+                            titulo = "Documentación completa";
+                            texto = "Los documentos están en proceso de validación";
+                            $jq1("#lblEstatusProveedor").text("En revisión para renovación desde: " + result);
+                            $jq1("#btnCertificar").hide();
+                            $jq1("#btnRenovar").hide();
+                        }
+                        MostrarMensajeExito(titulo, texto);
+                        OcultaCargando();
+                    }
+                });
+            }
+
+            function MostrarAlertaValidacion(mensaje) {
+                $jq1("#windowError").empty();
+                $jq1("#windowError").html(mensaje);
+                $jq1("#windowError").kendoWindow({ width: "415px", modal: true });
+                $jq1("#windowError").data("kendoWindow").center().open();
+            }
+
+            function MostrarAlertaValidacion(mensaje, ancho) {
+                $jq1("#windowError").empty();
+                $jq1("#windowError").html(mensaje);
+                $jq1("#windowError").kendoWindow({ width: ancho, modal: true });
+                $jq1("#windowError").data("kendoWindow").center().open();
+            }
+
+            function MuestraCargando() {
+                //var kendoWindow = $jq1("#divLoader");
+                //kendoWindow.kendoWindow({
+                //    width: "380px",
+                //    height: "175px",
+                //    title: "Espere...",
+                //    modal: true,
+                //    actions: []
+                //});
+                //kendoWindow.data("kendoWindow").center().open();
+
+                ////$jq1("#divLoader").css("position", "absolute");
+                //$jq1("#divLoader").css("z-index", "10050");
+                //$jq1("#divLoader").css("display", "block");
+
+                $jq1("#divLoader").css("display", "block");
+            }
+
+            function OcultaCargando() {
+                //var kendoWindow = $jq1("#divLoader");
+                //kendoWindow.data("kendoWindow").close();
+                //$jq1("#divLoader").css("display", "none");
+
+                $jq1("#divLoader").css("display", "none");
+            }
+
+            function DescargaPDFHor(datos, tit) {
+
+                var url = "../Descargas/DescargaPDFHor";
+                var getUrl = "../Descargas/DescargaCatalogo";
+                $jq1.ajax(
+                    url,
+                    {
+                        type: "POST",
+                        data: {
+                            __RequestVerificationToken: token,
+                            displayedDataAsJSON: JSON.stringify(datos), titulo: tit
+                        },
+                        dataType: "json",
+                        traditional: true,
+                        success: function (d) {
+                            if (d.success) {
+                                window.location = getUrl + "?fName=" + d.fName;
+                            }
+                        }
+                    }
+                );
+            }
+
+            function DescargarPDF(datos, tit) {
+
+                var url = "../Descargas/DescargaPDF";
+                var getUrl = "../Descargas/DescargaCatalogo";
+
+                $jq1.ajax(
+                    url,
+                    {
+                        type: "POST",
+                        data: {
+                            __RequestVerificationToken: token,
+                            displayedDataAsJSON: JSON.stringify(datos), titulo: tit
+                        },
+                        dataType: "json",
+                        traditional: true,
+                        success: function (d) {
+                            if (d.success) {
+                                window.location = getUrl + "?fName=" + d.fName;
+                            }
+                        }
+                    }
+                );
+            }
+
+            function get_browser() {
+                var ua = navigator.userAgent, tem, M = ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
+                if (/trident/i.test(M[1])) {
+                    tem = /\brv[ :]+(\d+)/g.exec(ua) || [];
+                    return { name: 'IE', version: (tem[1] || '') };
+                }
+                if (M[1] === 'Chrome') {
+                    tem = ua.match(/\bOPR\/(\d+)/)
+                    if (tem != null) { return { name: 'Opera', version: tem[1] }; }
+                }
+                M = M[2] ? [M[1], M[2]] : [navigator.appName, navigator.appVersion, '-?'];
+                if ((tem = ua.match(/version\/(\d+)/i)) != null) { M.splice(1, 1, tem[1]); }
+                return {
+                    name: M[0],
+                    version: M[1]
+                };
+            }
+
+            function MostrarMensajeExito(titulo, mensaje) {
+                swal(titulo, mensaje, "success");
+            }
+
+            function MostrarMensajeInformacion(titulo, mensaje) {
+                swal(titulo, mensaje, "info");
+            }
+
+            function MostrarMensajeAdvertencia(titulo, mensaje) {
+                swal(titulo, mensaje, "warning");
+            }
+
+            function MostrarMensajeError(titulo, mensaje) {
+                swal(titulo, mensaje, "error");
+            }
+
+            function MostrarMensajeHTML(tipo, titulo, mensaje) {
+                swal({
+                    title: titulo,
+                    text: mensaje,
+                    type: tipo,
+                    showCancelButton: false,
+                    confirmButtonColor: "#5CB85C",
+                    confirmButtonText: "Aceptar",
+                    html: true
+                }, function () { });
+            }
+
+            function mask(inputName, mask, evt) {
+                try {
+
+                    var text = document.getElementById(inputName);
+                    var value = text.value;
+
+                    // If user pressed DEL or BACK SPACE, clean the value
+                    try {
+
+                        var e = (evt.which) ? evt.which : event.keyCode;
+
+                        if (e == 46 || e == 8) {
+
+                            text.value = "";
+
+                            return;
+
+                        }
+                    } catch (e1) { }
+
+                    var literalPattern = /[0\*]/;
+
+                    var numberPattern = /[0-9]/;
+
+                    var newValue = "";
+
+                    for (var vId = 0, mId = 0; mId < mask.length;) {
+                        if (mId >= value.length)
+
+                            break;
+
+                        // Number expected but got a different value, store only the valid portion
+
+                        if (mask[mId] == '0' && value[vId].match(numberPattern) == null) {
+
+                            break;
+                        }
+
+                        // Found a literal
+                        while (mask[mId].match(literalPattern) == null) {
+
+                            if (value[vId] == mask[mId])
+
+                                break;
+
+                            newValue += mask[mId++];
+
+                        }
+
+                        newValue += value[vId++];
+
+                        mId++;
+
+                    }
+
+
+                    text.value = newValue;
+
+                } catch (e) { }
+            }
+
+            function CerrarSesionActiva() {
+                clearTimeout(timersSesion);
+                window.location.href = appAdmin.Urls.baseUrl + "User/Logout";
+            }
+
+            function CerrarSesionInactividad() {
+                clearTimeout(timersSesion);
+                window.location.href = appAdmin.Urls.baseUrl + "Home/CierreInactividad";
+            }
+
+            function ObtenerTimeOutSesion() {
+                try {
+
+                    sessionTimeout = 0;
+                    segundos = 0;
+                    BanderaMensaje = 0;
+                    $jq1.ajax({
+                        url: "../User/ObtenerTimeOut",
+                        data: {
+                            __RequestVerificationToken: token,
+                        },
+                        cache: false,
+                        async: false,
+                        type: "POST",
+                        error: function (e, errStatus, errorThrown) {
+                            MostrarMensajeError("¡Error!", "Ocurrió un error al validar actividad de sesión, " + errorThrown);
+                            CerrarSesionActiva();
+                        },
+                        success: function (result) {
+                            sessionTimeout = result.Objeto;
+                            ValidarSesionActiva();
+                        }
+                    });
+                    return sessionTimeout;
+                } catch (e) {
+                    MostrarMensajeError("¡Error!", "Ocurrio un error al obtener TimeOut de Sesión, Error: " + e.message);
+                }
+            }
+
+            function ValidarSesionActiva() {
+                try {
+
+                    // Asignando segundos de sesion a la etiqueta
+                    if (segundos <= 9) segundos = "0" + segundos;
+                    var TextoEtiqueta = sessionTimeout + ":" + segundos;
+
+                    if (segundos == 0) {
+                        sessionTimeout = sessionTimeout - 1;
+                        if (sessionTimeout <= 9) sessionTimeout = "0" + sessionTimeout;
+                        segundos = 60;
+                    }
+                    segundos = segundos - 1;
+
+                    if (sessionTimeout < 5 && utilizarSesion == false) {
+
+                        $jq1.ajax({
+                            url: "../User/ObtenerTimeOut",
+                            data: {
+                                __RequestVerificationToken: token,
+                            },
+                            cache: false,
+                            async: false,
+                            type: "POST",
+                            error: function (e, errStatus, errorThrown) {
+                                MostrarMensajeError("¡Error!", "Ocurrió un error al validar actividad de sesión, " + errorThrown);
+                                CerrarSesionActiva();
+                            },
+                            success: function (result) {
+                                sessionTimeout = result.Objeto;
+                                segundos = 0;
+                                BanderaMensaje = 0;
+                            }
+                        });
+                    }
+
+                    // Si la sesion no es 0
+                    if (sessionTimeout >= 1) {
+                        // Llamar a la funcion para validar sesion
+                        timersSesion = setTimeout("ValidarSesionActiva()", 1000);
+
+                    }
+                    else {
+
+                        if (BanderaMensaje <= 0) {
+
+                            MostrarCierreSesion();
+                            BanderaMensaje = 1;
+                        } else {
+                            $jq1("#lblTiempoRestanteSS").text(TextoEtiqueta);
+                        }
+                        timersSesion = window.setTimeout("ValidarSesionActiva()", 1000);
+
+                        if (segundos <= 0) {
+                            MostrarMensajeInformacion("¡Sesión Cerrada!", "Su sesión ha terminado y se ha cerrado de forma automática.");
+                            //CerrarSesionActiva();
+                            CerrarSesionInactividad();
+                        }
+                    }
+
+                } catch (e) {
+                    MostrarMensajeError("¡Error!", "Ocurrio un error al validar sesión, Error: " + e.message);
+                }
+            }
+
+            function MostrarCierreSesion() {
+                try {
+
+                    swal({
+                        title: "¡Cierre de Sesión!",
+                        text: "Su sesión esta a punto de terminar por inactividad, ¿desea continuar en el sistema?<br/><br/>Le quedan <label id='lblTiempoRestanteSS'></label> Segundos para que la sesión se cierre de forma automática.",
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#5CB85C",
+                        confirmButtonText: "Continuar",
+                        cancelButtonText: "Cerrar Sesión",
+                        closeOnConfirm: false,
+                        showLoaderOnConfirm: true,
+                        html: true
+                    },
+                        function (esConfirmacion) {
+
+                            if (esConfirmacion) {
+                                setTimeout(function () {
+
+                                    $jq1.ajax({
+                                        url: "../User/ValidarSesionActiva",
+                                        data: {
+                                            __RequestVerificationToken: token,
+                                        },
+                                        cache: false,
+                                        async: false,
+                                        type: "POST",
+                                        error:
+                                        function (e, errStatus, errorThrown) {
+                                            MostrarMensajeError("¡Error!", "Ocurrió un error al validar actividad de sesión, " + errorThrown);
+                                            CerrarSesionActiva();
+                                        },
+                                        success: function (result) {
+
+                                            if (result.ProcesoExitoso == 0) {
+                                                CerrarSesionActiva();
+                                                return;
+                                            }
+
+                                            sessionTimeout = 0;
+                                            segundos = 0;
+                                            BanderaMensaje = 0;
+
+                                            clearTimeout(timersSesion);
+
+                                            ObtenerTimeOutSesion();
+
+                                            MostrarMensajeExito("¡Sesión Activa!", "La sesión continúa activa, puede continuar trabajando");
+
+                                        }
+                                    });
+                                }, 100);
+                            }
+                            else {
+
+                                CerrarSesionActiva();
+                            }
+                        });
+
+                } catch (e) {
+                    MostrarMensajeError("¡Error!", "Ocurrio un error al prevenir cierre de sesión");
+                }
+            }
+
+            function GuardarEnBitacora(numero, etapa, descripcionCorta, descripcionLarga) {
+                $jq1.ajax({
+                    type: 'POST',
+                    url: appAdmin.Urls.baseUrl + 'User/GuardarBitacora',
+                    data: {
+                        numeroProcedimiento: numero,
+                        etapa: etapa,
+                        descripcionCorta: descripcionCorta,
+                        descripcionLarga: descripcionLarga
+                    },
+                    cache: false,
+                    error:
+                    function (e, errStatus, errorThrown) {
+                        OcultaCargando();
+                    },
+                    success: function (response) {
+                        OcultaCargando();
+                    }
+                });
+            }
+
+    </script>
+<div id="Principal">
+<div id="Header">
+<meta content="text/html; charset=utf-8" http-equiv="content-type"/>
+<meta content="IE=edge, IE=10, IE=9" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<link href="https://www.cfe.mx/cdn/2019/assets/css/cfe.css" rel="stylesheet"/>
+<link href="https://www.cfe.mx/cdn/2019/assets/images/favico.png" id="favicon" rel="shortcut icon" type="image/vnd.microsoft.icon"/>
+<div class="body-overlay"></div>
+<!-- Menu Derecho
+============================================= -->
+<div id="side-panel">
+<div class="side-panel-trigger" id="side-panel-trigger-close"><a href="#"><i class="icon-line-cross"></i></a></div>
+<div class="side-panel-wrap">
+<div class="widget clearfix">
+<h4>Menú</h4>
+<nav class="nav-tree nobottommargin">
+<ul>
+<li><a href="https://www.cfe.mx/consejo/Pages/default.aspx">CONSEJO DE ADMINISTRACIÓN</a></li><li><a href="https://www.cfe.mx/finanzas/Pages/default.aspx">FINANZAS</a></li><li><a href="https://www.cfe.mx/concursoscontratos/Pages/default.aspx">CONCURSOS Y CONTRATOS</a></li><li><a href="https://www.cfe.mx/transparencia_etica/Pages/default.aspx">TRANSPARENCIA  y ÉTICA</a></li><li><a href="https://www.cfe.mx/desarrollo_social/Pages/default.aspx">DESARROLLO SOCIAL</a></li><li><a href="https://www.cfe.mx/unidaddegenero/Pages/default.aspx">UNIDAD DE GÉNERO E INCLUSIÓN</a></li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<!-- Document Wrapper
+============================================= -->
+<div class="clearfix" id="wrapper" style="opacity: 1; animation-duration: 400ms;">
+<!-- Top Bar
+    ============================================= -->
+<div id="top-bar">
+<div class="container clearfix">
+<div class="col_half nobottommargin">
+<!-- Redes Sociales
+                ============================================= -->
+<div class="top-social">
+<ul></ul>
+</div>
+</div>
+<div class="col_half fright col_last nobottommargin">
+<!-- #top-search end -->
+<!-- Mi Cuenta
+                ============================================= -->
+<div class="top-social">
+<ul>
+<li><a class="si-facebook" data-hover-width="132.1875" href="https://www.facebook.com/CFENacional" style="width: 40px;" target="_blank"><span class="ts-icon"><i class="icon-facebook"></i></span><span class="ts-text">CFENacional</span></a></li>
+<li><a class="si-twitter" data-hover-width="94.9844" href="https://twitter.com/cfemx" style="width: 40px;" target="_blank"><span class="ts-icon"><i class="icon-twitter"></i></span><span class="ts-text">CFEmx</span></a></li>
+<li><a class="si-youtube" data-hover-width="135.5625" href="https://www.youtube.com/channel/UC5YjgDMZ08jSn4LxPom7O2Q/videos" style="width: 40px;" target="_blank"><span class="ts-icon"><i class="icon-youtube-play"></i></span><span class="ts-text">CFE Nacional</span></a></li>
+<li><a class="si-instagram" data-hover-width="132.2031" href="https://www.instagram.com/cfe_nacional/" style="width: 40px;" target="_blank"><span class="ts-icon"><i class="icon-instagram2"></i></span><span class="ts-text">cfe_nacional</span></a></li>
+<li>
+<div class="form-group">
+<div class="input-group input-group-lg" id="cse-search-box">
+<input class="form-control" id="qu" name="q" placeholder="buscar..." type="text" value=""/>
+<div class="input-group-append">
+<button class="input-group-btn btn" onclick="jQuery().SharePointFormSubmit(
+             {
+                   'element':'#cse-search-box',
+                   'frmMethod':'post',
+                   'frmAction': 'https://app.cfe.mx/Aplicaciones/OTROS/Buscador/Resultados.aspx?q=' + $('#qu').val(),
+                   'frmTarget':'_blank'
+
+             })" type="button">
+<i class="icon-search"></i>
+</button>
+</div>
+</div>
+</div>
+</li>
+<li><a class="si-cfe" data-hover-width="120.125" href="https://app.cfe.mx/Aplicaciones/CCFE/MiEspacio/Login.aspx" style="width: 40px;"><span class="ts-icon"><i class="icon-user"></i></span><span class="ts-text">Mi Espacio</span></a></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<!-- Header
+    ============================================= -->
+<header id="header">
+<div id="header-wrap">
+<div class="container clearfix">
+<div id="primary-menu-trigger"><i class="icon-reorder"></i></div>
+<!-- Logo
+                ============================================= -->
+<div id="logo">
+<a class="standard-logo" href="https://www.cfe.mx">
+<img alt="CFE" src="https://www.cfe.mx/cdn/2019/assets/images/logo.png"/>
+</a>
+<a class="retina-logo" href="https://www.cfe.mx">
+<img alt="CFE" src="https://www.cfe.mx/cdn/2019/assets/images/logo@2x.png"/>
+</a>
+</div>
+<!-- #logo end -->
+<!-- Primary Navigation
+                ============================================= -->
+<nav id="primary-menu"><ul class="sf-js-enabled" style="touch-action: pan-y;"><li class="mega-menu sub-menu"><a class="sf-with-ul" href="https://www.cfe.mx/nuestraempresa/Pages/queeslacfe.aspx">NUESTRA EMPRESA</a><div class="mega-menu-content style-2 clearfix" style='background-image: url("https://www.cfe.mx/cdn/2019/Imagenes/Menu/menu.jpg"); background-repeat: no-repeat; background-position: right bottom; display: none;'><ul class="mega-menu-column col-lg-2" style=""><li class="mega-menu-title sub-menu"><a class="sf-with-ul" href="https://www.cfe.mx/nuestraempresa/Pages/queeslacfe.aspx">¿QUÉ ES LA CFE?</a><ul style="display: none;"><li><a href="https://www.cfe.mx/nuestraempresa/Pages/mision.aspx">MISIÓN</a></li><li><a href="https://www.cfe.mx/nuestraempresa/Pages/vision.aspx">VISIÓN</a></li><li><a href="https://www.cfe.mx/nuestraempresa/Pages/historia.aspx">HISTORIA DE LA CFE</a></li></ul></li></ul><ul class="mega-menu-column col-lg-2" style=""><li class="mega-menu-title sub-menu"><a class="sf-with-ul" href="https://www.cfe.mx/nuestraempresa/Pages/historia.aspx">¿QUIÉNES SOMOS?</a><ul style="display: none;"><li><a href="https://www.cfe.mx/nuestraempresa/Pages/DG.aspx">DIRECTOR GENERAL</a></li><li><a href="https://www.cfe.mx/nuestraempresa/Pages/directores-corporativos.aspx">DIRECTORES CORPORATIVOS</a></li><li><a href="https://www.cfe.mx/nuestraempresa/Pages/Marco-Legal-y-Normativo.aspx">MARCO LEGAL Y NORMATIVO</a></li></ul></li></ul><ul class="mega-menu-column col-lg-2" style=""><li class="mega-menu-title sub-menu"><a class="sf-with-ul" href="https://www.cfe.mx/estructura/Pages/default.aspx">ESTRUCTURA</a><ul style="display: none;"><li><a href="https://www.cfe.mx/Generacion">GENERACIÓN</a></li><li><a href="https://www.cfe.mx/Transmision">TRANSMISIÓN</a></li><li><a href="https://www.cfe.mx/Distribucion">DISTRIBUCIÓN</a></li><li><a href="https://www.cfe.mx/suministrobasico">SUMINISTRADOR DE SERVICIOS BÁSICOS</a></li><li><a href="https://www.cfe.mx/Filiales">FILIALES</a></li></ul></li></ul><ul class="mega-menu-column col-lg-2" style=""><li class="mega-menu-title sub-menu"><a class="sf-with-ul" href="https://www.cfe.mxhttps://www.cfe.mx/estructura/Pages/default.aspx">​</a><ul style="display: none;"><li><a href="https://www.cfe.mx/unidadesdenegocio">UNIDADES DE NEGOCIO</a></li><li><a href="https://www.cfe.mx/internet-para-todos/Pages/default.aspx">TELECOMUNICACIONES E INTERNET PARA TODOS</a></li></ul></li></ul></div></li><li class="mega-menu sub-menu"><a class="sf-with-ul" href="#">SERVICIOS</a><div class="mega-menu-content style-2 clearfix" style='background-image: url("https://www.cfe.mx/cdn/2019/Imagenes/Menu/foto_clientes.jpg"); background-repeat: no-repeat; background-position: right bottom; display: none;'><ul class="mega-menu-column col-lg-2" style=""><li class="mega-menu-title sub-menu"><a class="sf-with-ul" href="https://www.cfe.mx/Hogar">HOGAR<br/><br/></a><ul style="display: none;"><li><div class="widget clearfix"><div class="ipost clearfix"><div class="entry-image"><a href="https://www.cfe.mx/Hogar"><img src="https://www.cfe.mx/cdn/2019/Imagenes/Menu/servicios_hogar.jpg"/></a></div></div></div></li></ul></li></ul><ul class="mega-menu-column col-lg-2" style=""><li class="mega-menu-title sub-menu"><a class="sf-with-ul" href="https://www.cfe.mx/Negocio">NEGOCIO<br/><br/></a><ul style="display: none;"><li><div class="widget clearfix"><div class="ipost clearfix"><div class="entry-image"><a href="https://www.cfe.mx/Negocio"><img src="https://www.cfe.mx/cdn/2019/Imagenes/Menu/servicios_comercio.jpg"/></a></div></div></div></li></ul></li></ul><ul class="mega-menu-column col-lg-2" style=""><li class="mega-menu-title sub-menu"><a class="sf-with-ul" href="https://www.cfe.mx/Industria">INDUSTRIA<br/><br/></a><ul style="display: none;"><li><div class="widget clearfix"><div class="ipost clearfix"><div class="entry-image"><a href="https://www.cfe.mx/Industria"><img src="https://www.cfe.mx/cdn/2019/Imagenes/Menu/servicios_industria.jpg"/></a></div></div></div></li></ul></li></ul><ul class="mega-menu-column col-lg-2" style=""><li class="mega-menu-title sub-menu"><a class="sf-with-ul" href="https://www.cfe.mx/Agricolayservicios/Pages/default.aspx">AGRíCOLA Y SERVICIOS</a><ul style="display: none;"><li><div class="widget clearfix"><div class="ipost clearfix"><div class="entry-image"><a href="https://www.cfe.mx/Agricolayservicios/Pages/default.aspx"><img src="https://www.cfe.mx/cdn/2019/Imagenes/Menu/servicios_agricola.jpg"/></a></div></div></div></li></ul></li></ul><ul class="mega-menu-column col-lg-2" style=""><li class="mega-menu-title sub-menu"><a class="sf-with-ul" href="https://www.cfe.mx/servicios_externos">Servicios Externos</a><ul style="display: none;"><li><div class="widget clearfix"><div class="ipost clearfix"><div class="entry-image"><a href="https://www.cfe.mx/servicios_externos"><img src="https://www.cfe.mx/cdn/2019/Imagenes/Menu/serv_ext.jpg"/></a></div></div></div></li></ul></li></ul></div></li><li class="mega-menu sub-menu"><a class="sf-with-ul" href="https://app.cfe.mx/Aplicaciones/OTROS/Boletines/AcercaDe">COMUNICACIÓN</a><div class="mega-menu-content style-2 clearfix" style='background-image: url("https://www.cfe.mx/cdn/2019/Imagenes/Menu/menu_comunic.jpg"); background-repeat: no-repeat; background-position: right bottom; display: none;'><ul class="mega-menu-column col-lg-2" style=""><li class="mega-menu-title sub-menu"><a class="sf-with-ul" href="https://app.cfe.mx/Aplicaciones/OTROS/Boletines/Prensa?c=1">SALA DE PRENSA</a><ul style="display: none;"><li><a href="https://app.cfe.mx/Aplicaciones/OTROS/Boletines/Prensa">PRENSA</a></li><li><a href="https://app.cfe.mx/Aplicaciones/OTROS/Boletines/Prensa?c=2">NOTAS INFORMATIVAS</a></li><li><a href="https://app.cfe.mx/Aplicaciones/OTROS/Boletines/Prensa?c=3">ENTREVISTAS</a></li><li><a href="https://app.cfe.mx/Aplicaciones/OTROS/Boletines/Prensa?c=4">ARTÍCULOS</a></li><li><a href="https://app.cfe.mx/Aplicaciones/OTROS/Boletines/Prensa?c=7">REPORTAJES</a></li></ul></li></ul><ul class="mega-menu-column col-lg-2" style=""><li class="mega-menu-title sub-menu"><a class="sf-with-ul" href="https://app.cfe.mx/Aplicaciones/OTROS/Boletines/Prensa?c=9">GALERÍA MULTIMEDIA</a><ul style="display: none;"><li><a href="https://app.cfe.mx/Aplicaciones/OTROS/Boletines/Prensa?c=9">CONFERENCIAS</a></li><li><a href="https://app.cfe.mx/Aplicaciones/OTROS/Boletines/Prensa?c=6">EVENTOS</a></li><li><a href="https://app.cfe.mx/Aplicaciones/OTROS/Boletines/Prensa?c=8">INFOGRAFÍAS</a></li><li><a href="https://app.cfe.mx/Aplicaciones/OTROS/Boletines/Prensa?c=5">VIDEOS</a></li></ul></li></ul><ul class="mega-menu-column col-lg-2" style=""><li class="mega-menu-title sub-menu"><a class="sf-with-ul" href="https://app.cfe.mx/Aplicaciones/OTROS/Boletines/StockFotos">KIT DE PRENSA</a><ul style="display: none;"><li><a href="https://app.cfe.mx/Aplicaciones/OTROS/Boletines/Prensa?c=10">ESTENOGRÁFICAS</a></li><li><a href="https://app.cfe.mx/Aplicaciones/OTROS/Boletines/StockFotos">STOCK FOTO</a></li></ul></li></ul><ul class="mega-menu-column col-lg-2" style=""><li class="mega-menu-title sub-menu"><a class="sf-with-ul" href="https://www.cfe.mx/dir_comunicacion/Pages/default.aspx">DIRECTORIO DE COMUNICACIÓN</a><ul style="display: none;"><li><a href="https://www.cfe.mx/dir_comunicacion/Pages/default.aspx">CONTACTO</a></li></ul></li></ul></div></li><li><a href="https://www.cfe.mx/concursoscontratos/Pages/registro.aspx">REGÍSTRATE COMO PROVEEDOR / CONTRATISTA</a></li></ul><div class="side-panel-trigger" id="side-panel-trigger"><a href="#"><i class="icon-reorder"></i></a></div></nav>
+<!-- #primary-menu end -->
+</div>
+</div>
+</header>
+<!-- #header end -->
+<!-- #banner interior -->
+<!-- Page Title
+============================================= -->
+<section class="page-title page-title-dark">
+<div class="image-cover">
+<div class="container">
+<img src="https://app.cfe.mx/cdn/2019/assets/images/headers/Header CFE_gris_Bco_Concursos y Contratos.png"/>
+</div>
+</div>
+<div class="container clearfix">
+<h1>PROCEDIMIENTOS DE CONTRATACIÓN Y VENTA DE BIENES</h1>
+</div>
+</section>
+<!-- #page-title end -->
+<!-- Page Sub Menu
+   ============================================= -->
+<div class="no-sticky" id="page-menu">
+<div id="page-menu-wrap">
+<div class="container clearfix">
+<div class="menu-title"><span>Sistema Electrónico de Contrataciones</span></div>
+<ol class="breadcrumb">
+<li class="breadcrumb-item"><a href="https://www.cfe.mx">CFE</a></li><li class="breadcrumb-item"><a href="https://www.cfe.mx/concursoscontratos/Pages/default.aspx">Concursos y contratos</a></li><li aria-current="page" class="breadcrumb-item active">Sistema Electrónico de Contrataciones</li>
+</ol>
+</div>
+</div>
+</div>
+<!-- #page-menu end -->
+<!-- #banner interior end-->
+</div>
+<!-- Go To Top
+============================================= -->
+<div class="icon-angle-up" id="gotoTop"></div>
+<!-- External JavaScripts -->
+<!-- ============================================= -->
+<script src="https://www.cfe.mx/cdn/jquery/3.5.1/jquery-3.5.1.min.js"></script>
+<!-- <script src="https://www.cfe.mx/cdn/2019/assets/js/plugins.js"></script> -->
+<script src="https://www.cfe.mx/cdn/2019/assets/js/plugins/jquery.fitvids.js"></script>
+<script src="https://www.cfe.mx/cdn/2019/assets/js/plugins/jquery.superfish.js"></script>
+<script src="https://www.cfe.mx/cdn/2019/assets/js/plugins/jquery.respond.js"></script>
+<script src="https://www.cfe.mx/cdn/2019/assets/js/plugins/jquery.cookie.js"></script>
+<script src="https://www.cfe.mx/cdn/2019/assets/js/plugins/jquery.appear.js"></script>
+<script src="https://www.cfe.mx/cdn/2019/assets/js/plugins/jquery.pagetransition.js"></script>
+<script src="https://www.cfe.mx/cdn/2019/assets/js/plugins/jquery.parallax.js"></script>
+<script src="https://www.cfe.mx/cdn/2019/assets/js/plugins/jquery.owlcarousel.js"></script>
+<script src="https://www.cfe.mx/cdn/2019/assets/js/plugins/jquery.isotope.js"></script>
+<script src="https://www.cfe.mx/cdn/2019/assets/js/plugins/jquery.imagesLoaded.js"></script>
+<script src="https://www.cfe.mx/cdn/2019/assets/js/plugins/jquery.swiper.js"></script>
+<script src="https://www.cfe.mx/cdn/2019/assets/js/plugins/jquery.sticky-sidebar.js"></script>
+<script src="https://www.cfe.mx/cdn/2019/assets/js/plugins/jquery.color.js"></script>
+<script src="https://www.cfe.mx/cdn/2019/assets/js/plugins/jquery.toastr.js"></script>
+<script src="https://www.cfe.mx/cdn/2019/assets/js/plugins/jquery.form.js"></script>
+<script src="https://www.cfe.mx/cdn/2019/assets/js/plugins/jquery.flexslider.js"></script>
+<script src="https://www.cfe.mx/cdn/2019/assets/js/plugins/jquery.paginate.js"></script>
+<script src="https://www.cfe.mx/cdn/2019/assets/js/plugins/jquery.tabs.js"></script>
+<script src="https://www.cfe.mx/cdn/2019/assets/js/plugins/jquery.bootstrap.js"></script>
+<script src="https://www.cfe.mx/cdn/2019/assets/js/plugins/jquery.boostrap.min.js"></script>
+<script src="https://www.cfe.mx/cdn/2019/assets/js/plugins/jquery.validation.js"></script>
+<script src="https://www.cfe.mx/cdn/2019/assets/js/jquery.SharePointFormSubmit.js"></script>
+<!-- Footer Scripts -->
+<!-- ============================================= -->
+<script src="https://www.cfe.mx/cdn/2019/assets/js/functions.js"></script>
+<script>
+    $('#qu').bind('keydown', function (e) {
+        if (e.keyCode == 13) {
+            e.preventDefault();
+        }
+    });
+</script>
+<script>
+    // jQuery Typing
+    (function (f) { function l(g, h) { function d(a) { if (!e) { e = true; c.start && c.start(a, b) } } function i(a, j) { if (e) { clearTimeout(k); k = setTimeout(function () { e = false; c.stop && c.stop(a, b) }, j >= 0 ? j : c.delay) } } var c = f.extend({ start: null, stop: null, delay: 400 }, h), b = f(g), e = false, k; b.keypress(d); b.keydown(function (a) { if (a.keyCode === 8 || a.keyCode === 46) d(a) }); b.keyup(i); b.blur(function (a) { i(a, 0) }) } f.fn.typing = function (g) { return this.each(function (h, d) { l(d, g) }) } })(jQuery);
+
+    jQuery(document).ready(function ($) {
+
+        $('#icons-filter').typing({
+            stop: function (event, $elem) {
+                var filterValue = $elem.val(),
+                    count = 0;
+
+                if ($elem.val()) {
+
+                    $(".icons-list li").each(function () {
+                        if ($(this).text().search(new RegExp(filterValue, "i")) < 0) {
+                            $(this).fadeOut();
+                        } else {
+                            $(this).show();
+                            count++
+                        }
+                    });
+                } else {
+                    $(".icons-list li").show();
+                }
+
+                count = 0;
+            },
+            delay: 500
+        });
+
+    });
+</script>
+<script type="text/javascript">
+	var _gaq = _gaq || [];
+	_gaq.push(['_setAccount', 'UA-75733004-1']);
+	_gaq.push(['_setDomainName', '.cfe.mx']);
+	_gaq.push(['_setAllowHash', false]);
+	_gaq.push(['_trackPageview']);
+	_gaq.push(['_trackPageLoadTime']);
+	(function () {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	})();
+</script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-HHX5QY23J4"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-HHX5QY23J4', {
+        'cookie_domain': 'cfe.mx',
+ 	'cookie_flags': 'SameSite=Lax;Secure'
+    });
+
+</script>
+</div>
+<div class="gti-app" id="Contenido">
+<div class="gti-container-fixed gti-app-css clearfix" style="min-height:50px;">
+<div class="row"> </div>
+<div class="row">
+<div class="col-md-6">
+<a class="read-more" href="/Aplicaciones/NCFE/Concursos/" style="font-size: 17px; color:forestgreen;"><span class="glyphicon glyphicon glyphicon-home"></span> Ir a Concursos</a>
+</div>
+<div class="col-md-6" id="iniciarLogin" style="font-size: 18px; float: right; text-align:right;">
+<a class="read-more" href="/Aplicaciones/NCFE/Concursos/User/Login">Iniciar Sesión  <img alt="Iniciar Sesión" src="/Aplicaciones/NCFE/Concursos/Content/img/login.png" width="30"/></a>
+</div>
+<div class="col-md-6" id="usuarioLoguedo" style="float:right;text-align:right;display:none;">
+<a href="/Aplicaciones/NCFE/Concursos/User/Index" style="font-size: 17px; color:lawngreen;cursor:pointer;"><label id="lblUserFirmado" style="cursor:pointer;color:forestgreen"></label></a>    
+                        <a class="read-more" href="/Aplicaciones/NCFE/Concursos/User/Logout" style="font-size: 15px;">Cerrar Sesión  <span class="glyphicon glyphicon glyphicon-log-out"></span></a>
+</div>
+<div class="col-md-6" id="divUsuarioLoguedoCB" style="float:right;text-align:right;display:none;">
+<label id="lblUserFirmadoCB" style="font-size: 17px; cursor: pointer; color: forestgreen;"></label>    
+                        <a class="read-more" href="/Aplicaciones/NCFE/Concursos/User/Logout" style="font-size: 15px;">Cerrar Sesión  <span class="glyphicon glyphicon glyphicon-log-out"></span></a>
+</div>
+</div>
+<div class="row" id="divEstatusDeProveedor" style="display:none;">
+<div class="col-md-12" style="float: right; text-align:right;margin-top:10px;">
+<a href="../Proveedores/DescargarVigencia" id="lnkConstancia" style="display:none;float:left;font-size: 15px;color:#ff6a00;" target="_blank">Descargar Constancia de Registro</a>
+<label>Estatus: </label>
+<text id="lblEstatusProveedor"></text> 
+                        <label class="control-label" id="lblDesdeHasta">Desde</label>
+<text id="lblFechaEstatusGeneral"></text>
+</div>
+</div>
+<form action="/Aplicaciones/NCFE/Concursos/Procedure/Details" id="__AjaxAntiForgeryForm" method="post"><input name="__RequestVerificationToken" type="hidden" value="PGkRu1apzXLWfwA9SOMjNYtFMFsW6P6qyn7JhK-mY0WLo763Zkl55xapFwPSs0HZ8zJb1GLZCOyAEW9nX-JlFi4v1s01"/></form>
+<script type="text/javascript">
+
+    var nextinput = 0;
+    var arreglo = new Array();
+    var chkSeleccionado;
+    //var continuar;
+    var usuarioFirmado;
+    var pagina;
+    var token;
+
+    $jq1(document).ready(function () {
+
+        var form = $('#__AjaxAntiForgeryForm');
+        token = $('input[name="__RequestVerificationToken"]', form).val();
+
+        //continuar = validaUsuarioLogueado();
+
+        getInfoSesionDetalle();
+
+        try {
+            if ("1" == 2) {
+                $("#spnTitulo").text("Proyecto de pliego ");
+                $(".proyectoPleigo").hide();
+            } else {
+                $("#spnTitulo").text("Procedimiento ");
+                $(".proyectoPleigo").show();
+            }
+            pagina = "vacia";
+
+            pagina = pagina.replace("&amp;", "&");
+
+            inicializaPantalla(pagina);
+
+            var userApiPath3 = '/Aplicaciones/NCFE/Concursos/User/validaSesionActivo';
+
+            $jq1.ajax({
+                url: userApiPath3,
+                data: {
+                    __RequestVerificationToken: token,
+                },
+                cache: false,
+                type: "POST",
+                dataType: 'json',
+                async: false,
+                error: function (e, errStatus, errorThrown) {
+                    MostrarMensajeError("¡Error!", "Ocurrió un error: " + errorThrown);
+                },
+                success: function (data2) {
+                    usuarioFirmado = data2;
+
+                    Validacion(usuarioFirmado, NumProc, 0);
+                }
+            });
+
+            var viewModel = kendo.observable({
+                isChecked1: true,
+                isChecked2: false
+            });
+
+            //kendo.bind($jq1("#chkPConsorcio"), viewModel);
+            //kendo.bind($jq1("#chkConsorcio"), viewModel);
+            chkSeleccionado = 1;
+
+            $jq1("#btnPartSubasta").click(function () {//inicio click
+                window.open(pagina);
+            });
+
+            $jq1("#btnPartic").click(function () {//inicio click
+
+                $jq1.ajax({
+                    url: appAdmin.Urls.baseUrl + "Procedure/insProveedorProcedimiento",
+                    data: {
+                        __RequestVerificationToken: token,
+                        numProcedimiento: NumProc
+                    },
+                    cache: false,
+                    type: "POST",
+                    error:
+                    function (e, errStatus, errorThrown) {
+                        MostrarMensajeError("¡Error!", "Ocurrio un error");
+                    },
+                    success: function (result) {
+                        MostrarMensajeExito("¡Registrado!", "Ha sido registrado exitosamente como concursante para el concurso: " + NumProc + " " + " " +
+                            "Ingrese al módulo de mis concursos para ver la conformacion");
+                    }
+                });
+
+                var popClose = $jq1("#divConfirmacion");
+                popClose.data("kendoWindow").close();
+
+            });//fin click
+
+            $jq1("#newProvd").click(function () {//inicio click
+                top.location = '../Proveedores';
+            });//fin click
+
+            var caracteresAMostrar = 400;
+            var contenido = $jq1("#descripcionD").html();
+
+            if (contenido.length > caracteresAMostrar) {
+                var resumen = contenido.substr(1, caracteresAMostrar);
+                var todo = contenido.substr(1, contenido.length);
+
+                $jq1("#ddCompleto").html(todo);
+                $jq1("#ddCompleto").hide();
+
+                var nuevocontenido = resumen + '<a class="read-more" style="color:#666ED0; cursor:pointer;"  onclick=VerDetalle()>&nbsp;(Leer mas...)<span id="more" class="k-icon k-i-arrow-e" ></span> </a>';
+
+                $jq1("#descripcionD").html(nuevocontenido);
+            }
+
+            MostrarTestigoSocial(NumProc);
+
+            MostrarSesionAclaraciones(NumProc);
+
+            MostrarVisitaSitio(NumProc);
+
+            MostrarSubastas(NumProc);
+
+            MostrarOtros(NumProc);
+
+            ObtenerFechasRecepcionPropuestas(NumProc);
+
+            MostrarPrecisiones($("#txtNumeroDeConcurso").val());
+
+            CargarPartidasResumen();
+
+        } catch (e) {
+            MostrarMensajeError("¡Error!", e.message);
+        }
+    });
+
+    function inicializaPantalla(pagina) {
+        pagina = pagina;
+    }
+
+    function Participar() {
+        if (usuarioFirmado == 0) {
+            MostrarVentana("divLoginProveedor");
+
+        }
+        else {
+            MuestraCargando();
+            Validacion(usuarioFirmado, NumProc, 1);
+
+        }
+    }
+
+    function Validacion(usuarioFirmado, NumProc, esBoton) {
+
+        if (usuarioFirmado != 0) {
+
+            $jq1.ajax({
+                url: appAdmin.Urls.baseUrl + "Procedure/ValidarFechasRecepcion",
+                data: {
+                    __RequestVerificationToken: token,
+                    numeroProcedimiento: NumProc
+                },
+                cache: false,
+                type: "POST",
+                error:
+                function (e, errStatus, errorThrown) {
+                    OcultaCargando();
+                    MostrarMensajeError("¡Error!", "Ocurrió un error al realizar la búsqueda del proveedor");
+                },
+                success: function (result) {
+
+                    if (result.ProcesoExitoso == 2) {
+                        $jq1("#btnParticipar").hide();
+                        $jq1("#btnPartic").hide();
+                        OcultaCargando();
+                        MostrarMensajeAdvertencia("¡Periodo Vencido!", "Estimado concursante, desafortunadamente el periodo establecido para la recepción de ofertas ha concluido.");
+                    } else {
+                        $jq1.ajax({
+                            url: appAdmin.Urls.baseUrl + "Procedure/ValidarProveedorProcedimiento",
+                            data: {
+                                __RequestVerificationToken: token,
+                                numProcedimiento: NumProc
+                            },
+                            cache: false,
+                            type: "POST",
+                            error:
+                            function (e, errStatus, errorThrown) {
+                                MostrarMensajeError("¡Error!", "Ocurrió un error al validar el usuario");
+                            },
+                            success: function (result) {
+                                if (result.length > 0) {
+                                    $jq1("#btnParticipar").hide();
+                                    $jq1("#divValidacion").show();
+                                    $jq1("#btnPartic").hide();
+                                    //$jq1("#btnContinuar").hide();
+                                    $jq1("#divProveedorConsorcio").hide();
+                                    if (esBoton == 1)
+                                        OcultaCargando();
+                                }
+                                else {
+                                    if (esBoton == 1) {
+                                        OcultaCargando();
+                                        swal({
+                                            title: "¡Inscripción al Concurso!",
+                                            text: "¿Está seguro que desea participar en este concurso?",
+                                            type: "warning",
+                                            showCancelButton: true,
+                                            confirmButtonColor: "#5CB85C",
+                                            confirmButtonText: "Aceptar",
+                                            cancelButtonText: "Cancelar",
+                                            closeOnConfirm: false,
+                                            showLoaderOnConfirm: true
+                                        }, function () {
+                                            $jq1.ajax({
+                                                url: appAdmin.Urls.baseUrl + "Procedure/insProveedorProcedimiento",
+                                                data: {
+                                                    __RequestVerificationToken: token,
+                                                    numProcedimiento: NumProc
+                                                },
+                                                cache: false,
+                                                type: "POST",
+                                                error:
+                                                function (e, errStatus, errorThrown) {
+                                                    MostrarMensajeError("¡Error!", "Ocurrió un error");
+                                                },
+                                                success: function (resultINS) {
+                                                    if (resultINS.ProcesoExitoso == 0) {
+                                                        MostrarMensajeError("¡Error!", resultINS.Mensaje);
+                                                        return;
+                                                    } else if (resultINS.ProcesoExitoso == -1) {
+                                                        MostrarMensajeAdvertencia("¡Validación!", resultINS.Mensaje);
+                                                        return;
+                                                    }
+
+                                                    MostrarMensajeExito("¡Éxito!", "Manifestó su interés para participar en este concurso: " + NumProc + " " + " " +
+                                                        "Ingrese al módulo de Mis Concursos para ver la confirmación");
+                                                    $jq1("#btnParticipar").hide();
+
+                                                    setTimeout(function () {
+                                                        location.href = "../User/Index";
+                                                    }, 2000);
+
+                                                }
+                                            });
+                                        });
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+
+        }
+    }
+
+    function VerDetalle() {
+        var popEditar = $jq1("#divCompleto");
+        popEditar.kendoWindow({
+            width: "450px",
+            height: "280px",
+            title: "Descripción Detallada",
+            modal: true,
+            resizable: false,
+            actions: ["Close"]
+        });
+        popEditar.data("kendoWindow").center().open();
+
+        $jq1("#ddCompleto").show();
+    }
+
+    function ObtenerProcedimiento(NumProc) {
+        $jq1.ajax({
+            url: appAdmin.Urls.baseUrl + "Procedure/GetProcedimiento",
+            data: {
+                __RequestVerificationToken: token,
+                numProcedimiento: NumProc
+            },
+            cache: false,
+            type: "POST",
+            error:
+            function (e, errStatus, errorThrown) { MostrarMensajeError("¡Error!", "Ocurrió un error"); },
+            success: function (result) {
+
+                if (result.ProcesoExitoso == 0) {
+                    MostrarMensajeError("¡Error!", result.Mensaje);
+                    return;
+                }
+
+                if (result.Lista.length > 0) {
+                    ArmarGridATecnica(result.Lista);
+                }
+                else {
+                    $jq1("#divAperturaTecnica").hide();
+                }
+            }
+        });
+    }
+
+    function MostrarTestigoSocial(NumProc) {
+        $jq1.ajax({
+            url: appAdmin.Urls.baseUrl + "Procedure/GetTestigoSocial",
+            data: {
+                __RequestVerificationToken: token,
+                numProcedimiento: NumProc
+            },
+            cache: false,
+            type: "POST",
+            error:
+            function (e, errStatus, errorThrown) { MostrarMensajeError("¡Error!", "Ocurrió un error"); },
+            success: function (result) {
+
+                if (result.ProcesoExitoso == 0) {
+                    MostrarMensajeError("¡Error!", result.Mensaje);
+                    return;
+                }
+
+                if (result.Lista.length > 0) {
+                    ArmarGridTestigoSocial(result.Lista);
+                }
+            }
+        });
+    }
+
+    function MostrarVisitaSitio(NumProc) {
+        $jq1.ajax({
+            url: appAdmin.Urls.baseUrl + "Procedure/GetVisitaSitio",
+            data: {
+                __RequestVerificationToken: token,
+                numProcedimiento: NumProc
+            },
+            cache: false,
+            type: "POST",
+            error:
+            function (e, errStatus, errorThrown) { MostrarMensajeError("¡Error!", "Ocurrió un error"); },
+            success: function (result) {
+
+                if (result.ProcesoExitoso == 0) {
+                    return;
+                }
+
+                if (result.Lista.length > 0) {
+                    ArmarGridVisitaSitio(result.Lista);
+                }
+            }
+        });
+    }
+
+    function ArmarGridVisitaSitio(Datos) {
+        if (Datos.length > 0) {
+            $jq1("#visitaSitio").kendoGrid({
+                dataSource: {
+                    data: Datos,
+                    schema: {
+                        model: {
+                            fields: {
+                                idvisitasitio: "idVisitaSitio",
+                                numprocedimiento: "NumProcedimiento",
+                                fechainicio: "FechaInicio",
+                                lugar: "Lugar",
+                            }
+                        }
+                    },
+                    pageSize: 10
+                },
+                selectable: "row",
+                scrollable: false,
+                sortable: true,
+                filterable: false,
+                pageable: false,
+                columns: [
+                    {
+                        field: "fechainicio",
+                        title: "Fecha Inicio",
+                        width: 150,
+
+                    },
+                    //{
+                    //    field: "fechafin",
+                    //    width: 230,
+                    //    title: "Fecha Fin",
+                    //    template: "#= kendo.toString(kendo.parseDate(fechafin, 'yyyy-MM-dd'), 'dd-MM-yyyy HH:mm') #"
+                    //},
+                    {
+                        field: "lugar",
+                        title: "Lugar"
+                    },
+                    //{
+                    //    width: 230,
+                    //    title: "Anexos",
+                    //    template: "<a class='k-button k-grid-edit' onclick=VerAnexos('#= idprocedimiento #','#= 4 #') style='min-width:11px;'><span class='k-icon k-i-search'></span></a>"
+                    //},
+                ]
+            });
+            $jq1("#visitaSitio").show();
+            $jq1("#divVisitaSitio").show();
+        }
+    }
+
+    function ArmarGridTestigoSocial(Datos) {
+        if (Datos.length > 0) {
+            $jq1("#GgridTestSocial").kendoGrid({
+                dataSource: {
+                    data: Datos,
+                    schema: {
+                        model: {
+                            fields: {
+                                Nombre: "GetDictionary.nombre",
+                                acuerdo: "GetDictionary.numeroacuerdo",
+                                archivo: "GetDictionary.nombrearchivo"
+                            }
+                        }
+                    },
+                    pageSize: 10
+                },
+                selectable: "row",
+                scrollable: false,
+                sortable: true,
+                filterable: false,
+                pageable: false,
+                columns: [
+                    {
+                        field: "acuerdo",
+                        title: "Acuerdo"
+                    },
+                    {
+                        field: "Nombre",
+                        title: "Testigo Social"
+                    },
+                    //{
+                    //    field: "archivo",
+                    //    title: "Testimonio Social"
+                    //},
+                ]
+            });
+            $jq1("#divTestSocial").show();
+            $jq1("#GgridTestSocial").show();
+        }
+    }
+
+    function MostrarSesionAclaraciones(NumProc) {
+        $jq1.ajax({
+            url: appAdmin.Urls.baseUrl + "Procedure/GetSesionAclaraciones",
+            data: {
+                __RequestVerificationToken: token,
+                numProcedimiento: NumProc
+            },
+            cache: false,
+            type: "POST",
+            error:
+            function (e, errStatus, errorThrown) { MostrarMensajeError("¡Error!", errorThrown); },
+            success: function (result) {
+
+                if (result.ProcesoExitoso == 0) {
+                    MostrarMensajeError("¡Error!", result.Mensaje);
+                    return;
+                }
+
+                if (result.Lista.length > 0) {
+                    ArmarGridAclaraciones(result.Lista);
+                }
+            }
+        });
+    }
+
+    function ArmarGridAclaraciones(Datos) {
+        if (Datos.length > 0) {
+            $jq1("#juntaAclaraciones").kendoGrid({
+                dataSource: {
+                    data: Datos,
+                    schema: {
+                        model: {
+                            fields: {
+                                idjuntaaclaraciones: "IdJuntaAclaraciones",
+                                numprocedimiento: "NumProcedimiento",
+                                numjunta: "NumJunta",
+                                fechainicio: "FechaInicio",
+                                fechafin: "FechaFin",
+                                fechainiciorecpreg: "FechaInicioRecPreg",
+                                fechafinrecpreg: "FechaFinRecPreg",
+                            }
+                        }
+                    },
+                    pageSize: 10
+                },
+                selectable: "row",
+                scrollable: false,
+                sortable: true,
+                filterable: false,
+                pageable: false,
+                columns: [
+                    {
+                        field: "numjunta",
+                        width: 50,
+                        title: "Sesión"
+                    },
+                    {
+                        field: "fechainiciorecpreg",
+                        width: 230,
+                        title: "Fecha Inicio Recepción de Preguntas",
+                        //template: "#= kendo.toString(kendo.parseDate(fechainiciorecpreg, 'yyyy-MM-dd'), 'dd-MM-yyyy HH:mm') #"
+                    },
+                    {
+                        field: "fechafinrecpreg",
+                        width: 230,
+                        title: "Fecha Fin Recepción de Preguntas",
+                        //template: "#= kendo.toString(kendo.parseDate(fechafinrecpreg, 'yyyy-MM-dd'), 'dd-MM-yyyy HH:mm') #"
+                    },
+                    {
+                        field: "fechainicio",
+                        width: 230,
+                        title: "Fecha Inicio Sesión",
+                        //template: "#= kendo.toString(kendo.parseDate(fechainicio, 'yyyy-MM-dd'), 'dd-MM-yyyy HH:mm') #"
+                    },
+                    {
+                        field: "fechafin",
+                        width: 230,
+                        title: "Fecha Cierre Sesión",
+                        //template: "#= kendo.toString(kendo.parseDate(fechafin, 'yyyy-MM-dd'), 'dd-MM-yyyy HH:mm') #"
+                    }
+                ]
+            });
+            $jq1("#juntaAclaraciones").show();
+            $jq1("#divJuntaAclaraciones").show();
+        }
+    }
+
+    function MostrarSubastas(NumProc) {
+        $jq1.ajax({
+            url: appAdmin.Urls.baseUrl + "Procedure/GetSubastas",
+            data: {
+                __RequestVerificationToken: token,
+                numProcedimiento: NumProc
+            },
+            cache: false,
+            type: "POST",
+            error:
+            function (e, errStatus, errorThrown) { MostrarMensajeError("¡Error!", "Ocurrio un error"); },
+            success: function (result) {
+
+                if (result.ProcesoExitoso == 0) {
+                    MostrarMensajeError("¡Error!", result.Mensaje);
+                    return;
+                }
+
+                if (result.Lista.length > 0) {
+                    ArmarGridSubastas(result.Lista);
+                }
+            }
+        });
+    }
+
+    function ArmarGridSubastas(Datos) {
+        if (Datos.length > 0) {
+            $jq1("#subastas").kendoGrid({
+                dataSource: {
+                    data: Datos,
+                    schema: {
+                        model: {
+                            fields: {
+                                idsubasta: "GetDictionary.idsubasta",
+                                numprocedimiento: "GetDictionary.numprocedimiento",
+                                fechainicio: "GetDictionary.fechainicio",
+                                fechafin: "GetDictionary.fechafin",
+                                lugar: "GetDictionary.lugar",
+                            }
+                        }
+                    },
+                    pageSize: 10
+                },
+                selectable: "row",
+                scrollable: false,
+                sortable: true,
+                filterable: false,
+                pageable: false,
+                columns: [
+                    {
+                        field: "fechainicio",
+                        width: 230,
+                        title: "Fecha Inicio",
+                        template: "#= kendo.toString(kendo.parseDate(fechainicio, 'yyyy-MM-dd'), 'dd-MM-yyyy HH:mm') #"
+                    },
+                    {
+                        field: "lugar",
+                        width: 230,
+                        title: "Lugar"
+                    },
+                ]
+            });
+            $jq1("#subastas").show();
+            $jq1("#divSubastas").show();
+        }
+    }
+
+    function MostrarOtros(NumProc) {
+        $jq1.ajax({
+            url: appAdmin.Urls.baseUrl + "Procedure/GetOtros",
+            data: {
+                __RequestVerificationToken: token,
+                numProcedimiento: NumProc
+            },
+            cache: false,
+            type: "POST",
+            error:
+            function (e, errStatus, errorThrown) { MostrarMensajeError("¡Error!", "Ocurrio un error"); },
+            success: function (result) {
+
+                if (result.ProcesoExitoso == 0) {
+                    MostrarMensajeError("¡Error!", result.Mensaje);
+                    return;
+                }
+
+                if (result.Lista.length > 0) {
+                    ArmarGridOtros(result.Lista);
+                }
+            }
+        });
+    }
+
+    function ArmarGridOtros(Datos) {
+        if (Datos.length > 0) {
+            $jq1("#otros").kendoGrid({
+                dataSource: {
+                    data: Datos,
+                    schema: {
+                        model: {
+                            fields: {
+                                idotros: "idVisitaSitio",
+                                numprocedimiento: "NumProcedimiento",
+                                fechainicio: "FechaInicio",
+                                descripcion: "Lugar",
+                            }
+                        }
+                    },
+                    pageSize: 10
+                },
+                selectable: "row",
+                scrollable: false,
+                sortable: true,
+                filterable: false,
+                pageable: false,
+                columns: [
+                    {
+                        field: "fechainicio",
+                        width: 240,
+                        title: "Fecha Inicio"
+                    },
+                    {
+                        field: "descripcion",
+                        title: "Lugar"
+                    },
+                ]
+            });
+            $jq1("#otros").show();
+            $jq1("#divOtros").show();
+        }
+    }
+
+    function VerAnexos(idProcedimiento, etapaProcedimiento) {
+        $jq1.ajax({
+            url: appAdmin.Urls.baseUrl + "Procedure/GetAnexos",
+            data: {
+                __RequestVerificationToken: token,
+                idProcedimiento: idProcedimiento,
+                EtapaProc: etapaProcedimiento
+            },
+            cache: false,
+            type: "POST",
+            error:
+            function (e, errStatus, errorThrown) { MostrarMensajeError("¡Error!", "Ocurrio un error"); },
+            success: function (result) {
+
+                if (result.ProcesoExitoso == 0) {
+                    MostrarMensajeError("¡Error!", result.Mensaje);
+                    return;
+                }
+
+                ArmarGridAnexos(result.Lista);
+
+                var popEditar = $jq1("#divAnexos");
+                popEditar.kendoWindow({
+                    width: "750px",
+                    height: "280px",
+                    title: "Anexos",
+                    modal: true,
+                    resizable: false,
+                    actions: ["Close"]
+                });
+                popEditar.data("kendoWindow").center().open();
+            }
+        });
+    }
+
+    function ArmarGridAnexos(Datos) {
+        if (Datos.length > 0) {
+            $jq1("#divNoInfo").hide();
+            $jq1("#divGridAnexos").kendoGrid({
+                dataSource: {
+                    data: Datos,
+                    schema: {
+                        model: {
+                            fields: {
+                                id: "GetDictionary.id",
+                                nombre: "GetDictionary.nombre",
+                                descripcion: "GetDictionary.descripcion",
+                                fechapublicacion: "GetDictionary.fechapublicacion",
+                                procedimientoid: "GetDictionary.procedimientoid",
+                                etapaprocedimientoid: "GetDictionary.etapaprocedimientoid",
+                            }
+                        }
+                    },
+                    pageSize: 10
+                },
+                selectable: "row",
+                scrollable: false,
+                sortable: true,
+                filterable: false,
+                pageable: false,
+                columns: [
+                    {
+                        field: "nombre",
+                        width: 230,
+                        title: "Archivo"
+                    },
+                    {
+                        field: "fechapublicacion",
+                        width: 230,
+                        title: "Fecha publicación",
+                        template: "#= kendo.toString(kendo.parseDate(fechapublicacion, 'yyyy-MM-dd'), 'dd-MM-yyyy') #"
+                    },
+                    {
+                        width: 230,
+                        title: "Descargar",
+                        template: "<a onclick=''><img src='~/Content/img/download.png' /></a>"
+                    },
+                ]
+            });
+            $jq1("#divGridAnexos").show();
+        }
+        else {
+            $jq1("#divNoInfo").show();
+        }
+    }
+
+    function ObtenerFechasRecepcionPropuestas(numeroProcedimiento) {
+        try {
+            $jq1.ajax({
+                url: appAdmin.Urls.baseUrl + "Procedure/FechasRecepcionPropuesta",
+                data: {
+                    __RequestVerificationToken: token,
+                    numeroProcedimiento: numeroProcedimiento
+                },
+                cache: false,
+                type: "POST",
+                error: function (e, errStatus, errorThrown) {
+                    MostrarMensajeError("¡ERROR!", errorThrown);
+                },
+                success: function (result) {
+                    if (result.ProcesoExitoso == 0) {
+
+                        OcultaCargando();
+                        MostrarMensajeError("¡Error!", result.Mensaje);
+                        return;
+                    }
+                    ArmarGridFechasRecepPropuesta(result.Lista);
+                }
+            });
+        } catch (e) {
+            MostrarMensajeError("¡ERROR!", e.nessage);
+        }
+    }
+
+    function ArmarGridFechasRecepPropuesta(Datos) {
+
+        $jq1("#divFechasRecepProp").empty();
+
+        if (Datos.length > 0) {
+            $jq1("#divFechasRecepProp").kendoGrid({
+                dataSource: {
+                    data: Datos,
+                    schema: {
+                        model: {
+                            fields: {
+                                idFecha: "IdFecha",
+                                fechaInicio: "FechaDeInicio",
+                                fechaFin: "FechaDeFin",
+                                esActivo: "EsActivo"
+                            }
+                        }
+                    },
+                    pageSize: 2
+                },
+                selectable: "row",
+                scrollable: false,
+                navigatable: false,
+                groupable: false,
+                sortable: true,
+                filterable: false,
+                resizable: true,
+                pageable: false,
+                columns: [
+                    {
+                        field: "fechaInicio",
+                        width: "33%",
+                        title: "Fecha Inicio",
+                        attributes: {
+                            style: "text-align: center !important;"
+                        },
+                    },
+                    {
+                        field: "fechaFin",
+                        width: "33%",
+                        title: "Fecha Fin",
+                        attributes: {
+                            style: "text-align: center !important;"
+                        },
+                    },
+                    {
+                        title: "Archivo de Financiamiento",
+                        template: "#= templateArchivoFinanc() #",
+                        width: "33%",
+                        attributes: {
+                            style: "text-align: center !important;"
+                        },
+                    }
+                ]
+            });
+        }
+    }
+    function templateArchivoFinanc() {
+        var stResult;
+        if (0 == 0) {
+            stResult = 'No';
+        } else {
+            stResult = 'Si';
+        }
+        return stResult;
+    }
+
+    function getInfoSesionDetalle() {
+        $jq1.ajax({
+            url: userApiPath,
+            data: {
+                __RequestVerificationToken: token,
+            },
+            cache: false,
+            type: "POST",
+            dataType: 'json',
+            error: function (e, errStatus, errorThrown) {
+                MostrarMensajeError("¡Error!", "Ocurrió un error: " + errorThrown);
+            },
+            success: function (result) {
+                if (result == "1") {
+                    obtenerSesionProveedorBusqueda();
+                }
+                else {
+                     $jq1("#iniciarLogin").show();
+                    document.getElementById("lblUserFirmado").innerHTML = "";
+                    $jq1("#usuarioLoguedo").hide();
+                }
+            }
+        });
+    }
+
+    function obtenerSesionProveedorBusqueda() {
+        $jq1.ajax({
+            url: '/Aplicaciones/NCFE/Concursos/Proveedores/ObtenerInformacionAutenticado',
+            data: {
+                __RequestVerificationToken: token,
+            },
+            cache: false,
+            type: "POST",
+            dataType: 'json',
+            error:
+                function (e, errStatus, errorThrown) {
+                    MostrarMensajeError("¡Error!", "Ocurrió un error: " + errorThrown);
+                },
+            success: function (result) {
+                if (result.ProcesoExitoso == 0) {
+                    MostrarMensajeError("¡Error!", result.Mensaje);
+                    return;
+                }
+                $jq1("#divPestañas").fadeIn();
+                idProveedorFirmado = result.Objeto.IdProveedor;
+                userName = result.Objeto.RazonSocial;
+                document.getElementById("lblUserFirmado").innerHTML = result.Objeto.RazonSocial;
+                $jq1("#iniciarLogin").hide();
+                $jq1("#usuarioLoguedo").show();
+                EstablecerProveedorPorObjeto(result);
+            }
+        });
+    }
+
+    function MostrarPrecisiones(numero) {
+        try {
+
+            $jq1.ajax({
+                url: appAdmin.Urls.baseUrl + "Procedure/PrecisionesTecnicas",
+                data: {
+                    __RequestVerificationToken: token,
+                    numeroConcurso: numero
+                },
+                cache: false,
+                type: "POST",
+                error: function (e, errStatus, errorThrown) {
+                    MostrarMensajeError("¡ERROR!", errorThrown);
+                },
+                success: function (result) {
+
+                    if (result.ProcesoExitoso == 0) {
+                        MostrarMensajeError("¡Error!", result.Mensaje);
+                        return;
+                    }
+
+                    ArmarGridPrecisionTecnica(result.Lista);
+
+                    $jq1.ajax({
+                        url: appAdmin.Urls.baseUrl + "Procedure/PrecisionesEconomicas",
+                        data: {
+                            __RequestVerificationToken: token,
+                            numeroConcurso: numero
+                        },
+                        cache: false,
+                        type: "POST",
+                        error: function (e, errStatus, errorThrown) {
+                            MostrarMensajeError("¡ERROR!", errorThrown);
+                        },
+                        success: function (datos) {
+
+                            if (datos.ProcesoExitoso == 0) {
+                                MostrarMensajeError("¡Error!", datos.Mensaje);
+                                return;
+                            }
+
+                            ArmarGridPrecisionEconomica(datos.Lista);
+                        }
+                    });
+
+                }
+            });
+
+        } catch (e) {
+            MostrarMensajeError("¡Error!", e.message);
+        }
+    }
+
+    function ArmarGridPrecisionTecnica(datos) {
+        try {
+
+            $jq1("#divGridPT").empty();
+
+            if (datos.length > 0) {
+                $jq1("#divPrecisionesTecnicas").show();
+                $jq1("#divGridPT").kendoGrid({
+                    dataSource: {
+                        data: datos,
+                        schema: {
+                            model: {
+                                fields: {
+                                    idPrecision: "IdPrecision",
+                                    fechaSolicitud: "FechaSolicitud",
+                                    concursante: "NombreProveedor",
+                                    fechaLimite: "FechaLimite",
+                                    nombreArchivo: "NombreArchivo",
+                                    cadena: "CadenaId"
+                                }
+                            }
+                        },
+                        pageSize: 10
+                    },
+                    selectable: "row",
+                    scrollable: false,
+                    navigatable: false,
+                    groupable: false,
+                    sortable: true,
+                    filterable: false,
+                    resizable: true,
+                    pageable: false,
+                    columns: [
+                        {
+                            title: "<b>Fecha de Solicitud</b>",
+                            template: "#= kendo.toString(kendo.parseDate(fechaSolicitud, 'yyyy-MM-dd'), 'dd-MM-yyyy HH:mm') #"
+                        },
+                        {
+                            field: "concursante",
+                            title: "<b>Solicitada a</b>",
+                        },
+                        {
+                            title: "<b>Fecha Límite de Atención</b>",
+                            template: "#= kendo.toString(kendo.parseDate(fechaLimite, 'yyyy-MM-dd'), 'dd-MM-yyyy HH:mm') #"
+                        },
+                        {
+                            title: "<b>Anexo</b>",
+                            template: "#= PlantillaDescargarAnexo(cadena,nombreArchivo) #"
+                        },
+                        {
+                            title: "<b>Detalle</b>",
+                            template: '<center><a target="_blank"><img src="' + appAdmin.Urls.baseUrl + 'Content/img/lupa.png" style="cursor:pointer;" onclick="DetallePrecision(#=idPrecision#)" /></a></center>',
+                        }
+                    ]
+                });
+            }
+            else {
+                $jq1("#divPrecisionesTecnicas").hide();
+            }
+
+        } catch (e) {
+            MostrarMensajeError("¡Error!", e.message);
+        }
+    }
+
+    function ArmarGridPrecisionEconomica(datos) {
+        try {
+
+            $jq1("#divGridPE").empty();
+
+            if (datos.length > 0) {
+                $jq1("#divPrecisionesEconomicas").show();
+                $jq1("#divGridPE").kendoGrid({
+                    dataSource: {
+                        data: datos,
+                        schema: {
+                            model: {
+                                fields: {
+                                    idPrecision: "IdPrecision",
+                                    fechaSolicitud: "FechaSolicitud",
+                                    concursante: "NombreProveedor",
+                                    fechaLimite: "FechaLimite",
+                                    nombreArchivo: "NombreArchivo",
+                                    cadena: "CadenaId"
+                                }
+                            }
+                        },
+                        pageSize: 10
+                    },
+                    selectable: "row",
+                    scrollable: false,
+                    navigatable: false,
+                    groupable: false,
+                    sortable: true,
+                    filterable: false,
+                    resizable: true,
+                    pageable: false,
+                    columns: [
+                        {
+                            title: "<b>Fecha de Solicitud</b>",
+                            template: "#= kendo.toString(kendo.parseDate(fechaSolicitud, 'yyyy-MM-dd'), 'dd-MM-yyyy HH:mm') #"
+                        },
+                        {
+                            field: "concursante",
+                            title: "<b>Solicitada a</b>",
+                        },
+                        {
+                            title: "<b>Fecha Límite de Atención</b>",
+                            template: "#= kendo.toString(kendo.parseDate(fechaLimite, 'yyyy-MM-dd'), 'dd-MM-yyyy HH:mm') #"
+                        },
+                        {
+                            title: "<b>Anexo</b>",
+                            template: "#= PlantillaDescargarAnexo(cadena,nombreArchivo) #"
+                        },
+                        {
+                            title: "<b>Detalle</b>",
+                            template: '<center><a target="_blank"><img src="' + appAdmin.Urls.baseUrl + 'Content/img/lupa.png" style="cursor:pointer;" onclick="DetallePrecision(#=idPrecision#)" /></a></center>',
+                        }
+                    ]
+                });
+            }
+            else {
+                $jq1("#divPrecisionesEconomicas").hide();
+            }
+
+        } catch (e) {
+            MostrarMensajeError("¡Error!", e.message);
+        }
+    }
+
+    function PlantillaDescargarAnexo(cadena, nombreArchivo) {
+        try {
+            return "<a href='../Procedure/DescargarPrecision?idPrecision=" + cadena + "' target='_blank'>" + nombreArchivo +"</a>";
+        } catch (e) {
+            ;
+        }
+    }
+
+    function PlantillaDetallePrecision(cadena) {
+        try{
+            return "<center><a target='_blank'><img src='../Content/img/lupa.png' style='cursor:pointer;' onclick='DetallePrecision('" + cadena + "') /></a></center>";
+        }
+        catch (e) {
+            ;
+        }
+    }
+
+    function DetallePrecision(idPrecision) {
+        try {
+
+            MuestraCargando();
+
+            $jq1.ajax({
+                url: appAdmin.Urls.baseUrl + "Procedure/ObtenerDetallePrecision",
+                data: {
+                    __RequestVerificationToken: token,
+                    idPrecision: idPrecision
+                },
+                cache: false,
+                type: "POST",
+                error: function (e, errStatus, errorThrown) {
+                    OcultaCargando();
+                    MostrarMensajeError("¡ERROR!", errorThrown);
+                },
+                success: function (datos) {
+
+                    $("#txtFechaSolicitudD").val(kendo.toString(kendo.parseDate(datos.FechaSolicitud, 'yyyy-MM-dd'), 'dd-MM-yyyy HH:mm'));
+                    $("#txtDescripcionD").val(datos.Descripcion);
+                    $("#txtProveedorD").val(datos.NombreProveedor);
+                    $("#txtFechaLimiteD").val(kendo.toString(kendo.parseDate(datos.FechaLimite, 'yyyy-MM-dd'), 'dd-MM-yyyy HH:mm'));
+
+                    $jq1.ajax({
+                        url: appAdmin.Urls.baseUrl + "Procedure/ObtenerRespuestasPrecision",
+                        data: {
+                            __RequestVerificationToken: token,
+                            idPrecision: idPrecision
+                        },
+                        cache: false,
+                        type: "POST",
+                        error: function (e, errStatus, errorThrown) {
+                            OcultaCargando();
+                            MostrarMensajeError("¡ERROR!", errorThrown);
+                        },
+                        success: function (result) {
+                            OcultaCargando();
+                            ArmarTablaRespuestaPrecision(result);
+                            MostrarVentana("divDetallePrecision");
+                        }
+                    });
+                }
+            });
+
+        } catch (e) {
+            OcultaCargando();
+            MostrarMensajeError("¡Error!", e.message);
+        }
+    }
+
+    function ArmarTablaRespuestaPrecision(datos) {
+        $("#tblRespuestasPrecision > tbody").empty();
+        if (datos.length > 0) {
+            $("#divSinRespuestas").hide();
+            var texto = "";
+            datos.forEach(function (actual) {
+                texto += "<tr><td>" + kendo.toString(kendo.parseDate(actual.FechaRespuesta, 'yyyy-MM-dd'), 'dd-MM-yyyy HH:mm') + "</td><td>" +
+                    "<a href='../Procedure/DescargarRespuestaPrecision?idRespuesta=" + actual.CadenaId + "' target='_blank'>" + actual.NombreArchivo + "</a>" + "</td></tr>";
+            });
+
+            $("#tblRespuestasPrecision > tbody").append(texto);
+        }
+        else {
+            $("#divSinRespuestas").show();
+        }
+    }
+
+    function VerificarSesion() {
+        try {
+
+            if ($jq1("#form-name").val() == "" && $jq1("#form-password").val() == "") {
+                MostrarMensajeAdvertencia("¡Campos Requeridos!", "El usuario y contraseña son obligatorios");
+                return;
+            }
+
+            MuestraCargando();
+            $jq1.ajax({
+                url: appAdmin.Urls.baseUrl + "User/ObtieneElInicioDeSesion",
+                data: {
+                    __RequestVerificationToken: token,
+                    email: $jq1("#form-name").val(),
+                    password: $jq1("#form-password").val()
+                },
+                cache: false,
+                type: "POST",
+                dataType: 'json',
+                error:
+                    function (e, errStatus, errorThrown) {
+                        OcultaCargando();
+                        MostrarMensajeError("¡Error!", "Ocurrió un error: " + errorThrown);
+                },
+                success: function (result) {
+
+                    if (result.ProcesoExitoso == 0) {
+                        MostrarMensajeError("¡Error!", result.Mensaje);
+                        return;
+                    }
+
+                    if (result.Lista.length > 0) {
+
+                        OcultarVentana("divLoginProveedor");
+                        $jq1("#form-name").val("");
+                        $jq1("#form-password").val("");
+
+                        $jq1.ajax({
+                            url: '/Aplicaciones/NCFE/Concursos/User/validaSesionActivo',
+                            data: {
+                                __RequestVerificationToken: token,
+                            },
+                            cache: false,
+                            type: "POST",
+                            dataType: 'json',
+                            async: false,
+                            error: function (e, errStatus, errorThrown) {
+                                MostrarMensajeError("¡Error!", "Ocurrió un error: " + errorThrown);
+                            },
+                            success: function (data2) {
+                                usuarioFirmado = data2;
+
+                                Validacion(usuarioFirmado, NumProc, 1);
+                            }
+                        });
+                    }
+                    else {
+                        OcultaCargando();
+                        MostrarMensajeError("¡Error!", "Los datos de acceso son incorrectos, verifique e intente de nuevo");
+                    }
+                }
+            });
+
+        } catch (e) {
+            MostrarMensajeError("¡Error!", e.message);
+        }
+    }
+
+    function CargarPartidasResumen() {
+        try {
+
+            if (1 != 1) {
+                $jq1.ajax({
+                    url: appAdmin.Urls.baseUrl + "Ofertas/ObtenerResumenPartidas",
+                    data: {
+                        __RequestVerificationToken: token,
+                        idProcedimiento: 156127
+                    },
+                    cache: false,
+                    type: "POST",
+                    dataType: 'json',
+                    async: false,
+                    error: function (e, errStatus, errorThrown) {
+                        MostrarMensajeError("¡Error!", "Ocurrió un error: " + errorThrown);
+                    },
+                    success: function (result) {
+
+                        if (result.ProcesoExitoso == 0) {
+                            $("#divResumenFallo").hide();
+                            MostrarMensajeError("¡Error!", result.Mensaje);
+                            return;
+                        }
+                        else if (result.ProcesoExitoso == 1) {
+                            $("#divResumenFallo").show();
+                            ArmarGridPartidasResumen(result.Lista);
+                        }
+                        else {
+                            $("#divResumenFallo").hide();
+                        }
+
+                    }
+                });
+            }
+            else {
+                $("#divResumenFallo").hide();
+            }
+
+        } catch (e) {
+            MostrarMensajeError("¡Error!", e.message);
+        }
+    }
+
+    function ArmarGridPartidasResumen(datos) {
+
+        $jq1("#divGridPartidasResumen").empty();
+
+        if (datos.length > 0) {
+            $jq1("#divGridPartidasResumen").kendoGrid({
+                dataSource: {
+                    data: datos,
+                    schema: {
+                        model: {
+                            fields: {
+                                idPartida: "IdPartida",
+                                numeroPartida: "NumeroPartida",
+                                descripcionPartida: "DescripcionPartida",
+                                estatus: "Estatus",
+                                proveedor: "Proveedor",
+                                monto: "Monto"
+                            }
+                        }
+                    },
+                    pageSize: 10
+                },
+                selectable: "row",
+                scrollable: false,
+                navigatable: false,
+                groupable: false,
+                sortable: true,
+                filterable: false,
+                resizable: true,
+                pageable: false,
+                columns: [
+                    {
+                        field: "numeroPartida",
+                        width: 150,
+                        title: "Partida"
+                    },
+                    {
+                        field: "descripcionPartida",
+                        width: 300,
+                        title: "Descripción Partida"
+                    },
+                    {
+                        field: "estatus",
+                        width: 150,
+                        title: "Estatus"
+                    },
+                    {
+                        field: "proveedor",
+                        width: 300,
+                        title: "Proveedor"
+                    },
+                    {
+                        field: "monto",
+                        width: 230,
+                        title: "Monto",
+                        format: "{0:c2}"
+                    }
+                ]
+            });
+        }
+    }
+
+</script>
+<div class="row">
+<div class="col-md-12">
+<div class="page-header">
+<h1><span id="spnTitulo">Procedimiento </span> <small> No. CFE-0900-CASAN-0006-2023</small></h1>
+<input id="txtNumeroDeConcurso" type="hidden" value="CFE-0900-CASAN-0006-2023"/>
+</div>
+</div>
+</div>
+<script type="text/javascript">
+    var NumProc = '"CFE-0900-CASAN-0006-2023"';
+</script>
+<div class="row">
+<div class="col-md-12">
+<div class="panel panel-primary">
+<div class="panel-heading">
+<b style="font-size: 15px;">Datos Generales [Tiempo del Centro: UTC -6 (UTC -5 en verano)]</b>
+</div>
+<table class="table table-striped fixed">
+<tbody>
+<tr>
+<td class="col-md-6 text-left" style="width:20%; color:black; font-weight:bold;">
+                            Empresa
+                        </td>
+<td class="col-md-6">
+                            0900 - CFE Generación VI
+                        </td>
+</tr>
+<tr>
+<td class="text-left" style="color: black; font-weight: bold; ">
+                            Área Contratante
+                        </td>
+<td>
+                            0900 - CFE Generación VI
+                        </td>
+</tr>
+<tr>
+<td class="text-left" style=" color: black; font-weight: bold;">
+                            Entidad Federativa
+                        </td>
+<td>
+                            Veracruz de Ignacio de la Llave
+                        </td>
+</tr>
+<tr>
+<td class="text-left" style=" color: black; font-weight: bold;">
+                            Descripción del bien, arrendamiento, servicio, obra ó servicio de obra
+                        </td>
+<td>
+                            6100001311 Servicio de mantenimiento y modernización de equipos eléctricos en la subestación de obra de toma de la Central Ciclo Combinado Poza Rica
+                        </td>
+</tr>
+<tr>
+<td class="text-left" style=" color: black; font-weight: bold;">
+                            Descripción detallada
+                        </td>
+<td>
+<div id="descripcionD">
+                                6100001311 Servicio de mantenimiento y modernización de equipos eléctricos en la subestación de obra de toma de la Central Ciclo Combinado Poza Rica
+                            </div>
+</td>
+</tr>
+<tr>
+<td class="text-left" style=" color: black; font-weight: bold;">
+                            Tipo de Procedimiento
+                        </td>
+<td>
+                            Concurso abierto
+                        </td>
+</tr>
+<tr>
+<td class="text-left" style=" color: black; font-weight: bold;">
+                            Tipo de Contratación
+                        </td>
+<td>
+                            Servicio por Abastecimiento
+                        </td>
+</tr>
+<tr>
+<td class="text-left" style=" color: black; font-weight: bold;">
+                            Estado del Procedimiento
+                        </td>
+<td>
+                            Vigente
+                        </td>
+</tr>
+<tr>
+<td class="text-left" style=" color: black; font-weight: bold;">
+                            Testigo Social
+                        </td>
+<td>
+                            No
+                        </td>
+</tr>
+<tr>
+<td class="text-left" style=" color: black; font-weight: bold;">
+                            Fecha Publicación
+                        </td>
+<td>
+                            26/05/2023 12:20 hrs
+                        </td>
+</tr>
+<tr>
+<td class="text-left" style="color: black; font-weight: bold;">
+                            Adjudicado A
+                        </td>
+<td>
+</td>
+</tr>
+<tr>
+<td class="text-left" style=" color: black; font-weight: bold;">
+                            Monto Adjudicado
+                        </td>
+<td>
+</td>
+</tr>
+<tr>
+<td class="text-left" style=" color: black; font-weight: bold;">
+                            Tipo de Moneda
+                        </td>
+<td>
+                            Pesos mexicanos
+                        </td>
+</tr>
+<tr>
+<td class="text-left" style="color: black; font-weight: bold;">
+                            Tipo de Cambio
+                        </td>
+<td>
+</td>
+</tr>
+<tr>
+<td class="text-left" style="color: black; font-weight: bold;">
+                            Monto Adjudicado en Pesos Mexicanos
+                        </td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<br/>
+<div class="row">
+<div class="col-md-12">
+<div class="panel panel-info">
+<div class="panel-heading">
+<b style="font-size:15px;">Anexos de la Publicación [Tiempo del Centro: UTC -6 (UTC -5 en verano)]</b>
+</div>
+<table class="table table-striped fixed">
+<thead>
+</thead><colgroup><col width="30%"/>
+<col width="40%"/>
+<col width="20%"/>
+<col width="10%"/>
+</colgroup><tbody><tr>
+<th>
+                                Archivo
+                            </th>
+<th>
+                                Descripción
+                            </th>
+<th>
+                                Fecha de publicación
+                            </th>
+<th>
+                                Descargar
+                            </th>
+</tr>
+</tbody><tbody>
+<tr>
+<td>
+                                    Anexos al Pliego de Requisitos CASAN-0006-2023.rar
+                                </td>
+<td>
+                                    Anexos al Pliego de Requisitos CASAN-0006-2023
+                                </td>
+<td>
+                                    26/05/2023
+                                </td>
+<td class="orangeLink">
+<a href="/Aplicaciones/NCFE/Concursos/Procedure/GetAnexo/1318645"><img src="/Aplicaciones/NCFE/Concursos/Content/img/download.png"/></a>
+</td>
+</tr>
+<tr>
+<td>
+                                    Convocatoria y Pliego de Requisitos CASAN-0006-2023.pdf
+                                </td>
+<td>
+                                    Convocatoria y Pliego de Requisitos CASAN-0006-2023
+                                </td>
+<td>
+                                    26/05/2023
+                                </td>
+<td class="orangeLink">
+<a href="/Aplicaciones/NCFE/Concursos/Procedure/GetAnexo/1318644"><img src="/Aplicaciones/NCFE/Concursos/Content/img/download.png"/></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="row" id="divTestSocial" style="display:none;">
+<div class="col-md-12">
+<div class="panel panel-info">
+<div class="panel-heading">
+<b style="font-size:15px;">Testigo Social</b>
+</div>
+<div class="divGridBusqueda" id="GgridTestSocial" style="display:block;"></div>
+</div>
+</div>
+</div>
+<div class="row" id="divVisitaSitio" style="">
+<div class="col-md-12">
+<div class="panel panel-info">
+<div class="panel-heading">
+<b style="font-size:15px;">Visitas en Sitio</b>
+</div>
+<div class="divGridBusqueda k-grid k-widget" data-role="grid" id="visitaSitio" style="display:block;"><table class="k-selectable" data-role="selectable" role="grid"><colgroup><col style="width:150px"/><col/></colgroup><thead class="k-grid-header" role="rowgroup"><tr role="row"><th class="k-header" data-field="fechainicio" data-role="columnsorter" data-title="Fecha Inicio" role="columnheader"><a class="k-link" href="#">Fecha Inicio</a></th><th class="k-header" data-field="lugar" data-role="columnsorter" data-title="Lugar" role="columnheader"><a class="k-link" href="#">Lugar</a></th></tr></thead><tbody role="rowgroup"><tr data-uid="50a17c12-572d-473a-b285-a25827032e0a" role="row"><td role="gridcell">29/05/2023 10:00:00 a. m.</td><td role="gridcell">Partiendo de Superintendencia de la Central Ciclo Combinado Poza Rica ubicada en Carretera México-Tuxpan Km. 194, Ejido San Miguel Mecatepec, Tihuatlán, Veracruz, C.P. 92903</td></tr></tbody></table></div>
+</div>
+</div>
+</div>
+<div class="row">
+<div class="col-md-12">
+<div class="panel panel-default">
+<div class="panel-heading">
+<b>Anexos de Visitas en Sitio</b>
+</div>
+<table class="table table-striped fixed">
+<thead>
+</thead><colgroup><col width="30%"/>
+<col width="40%"/>
+<col width="20%"/>
+<col width="10%"/>
+</colgroup><tbody><tr>
+<th>
+                                    Archivo
+                                </th>
+<th>
+                                    Descripción
+                                </th>
+<th>
+                                    Fecha de publicación
+                                </th>
+<th>
+                                    Descargar
+                                </th>
+</tr>
+</tbody><tbody>
+<tr>
+<td>
+                                        PDFActa_125406.pdf
+                                    </td>
+<td>
+                                        Acta de Visita al Sitio CASAN-0006-2023
+                                    </td>
+<td>
+                                        29/05/2023
+                                    </td>
+<td class="orangeLink">
+<a href="/Aplicaciones/NCFE/Concursos/Procedure/GetAnexo/1320075"><img src="/Aplicaciones/NCFE/Concursos/Content/img/download.png"/></a>
+</td>
+</tr>
+<tr>
+<td>
+                                        Acta de VS CASAN 0006 2023.pdf
+                                    </td>
+<td>
+                                        Acta de VS CASAN 0006 2023
+                                    </td>
+<td>
+                                        29/05/2023
+                                    </td>
+<td class="orangeLink">
+<a href="/Aplicaciones/NCFE/Concursos/Procedure/GetAnexo/1320076"><img src="/Aplicaciones/NCFE/Concursos/Content/img/download.png"/></a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="row" id="divJuntaAclaraciones" style="">
+<div class="col-md-12">
+<div class="panel panel-success">
+<div class="panel-heading">
+<b style="font-size: 15px;">Sesión de Aclaraciones [Tiempo del Centro: UTC -6 (UTC -5 en verano)]</b>
+</div>
+<div class="divGridBusqueda k-grid k-widget" data-role="grid" id="juntaAclaraciones" style="display:block;"><table class="k-selectable" data-role="selectable" role="grid"><colgroup><col style="width:50px"/><col style="width:230px"/><col style="width:230px"/><col style="width:230px"/><col style="width:230px"/></colgroup><thead class="k-grid-header" role="rowgroup"><tr role="row"><th class="k-header" data-field="numjunta" data-role="columnsorter" data-title="Sesión" role="columnheader"><a class="k-link" href="#">Sesión</a></th><th class="k-header" data-field="fechainiciorecpreg" data-role="columnsorter" data-title="Fecha Inicio Recepción de Preguntas" role="columnheader"><a class="k-link" href="#">Fecha Inicio Recepción de Preguntas</a></th><th class="k-header" data-field="fechafinrecpreg" data-role="columnsorter" data-title="Fecha Fin Recepción de Preguntas" role="columnheader"><a class="k-link" href="#">Fecha Fin Recepción de Preguntas</a></th><th class="k-header" data-field="fechainicio" data-role="columnsorter" data-title="Fecha Inicio Sesión" role="columnheader"><a class="k-link" href="#">Fecha Inicio Sesión</a></th><th class="k-header" data-field="fechafin" data-role="columnsorter" data-title="Fecha Cierre Sesión" role="columnheader"><a class="k-link" href="#">Fecha Cierre Sesión</a></th></tr></thead><tbody role="rowgroup"><tr data-uid="5d4a503f-f191-46cf-89d2-7dfa40a73159" role="row"><td role="gridcell">1</td><td role="gridcell">29/05/2023 06:00:00 p. m.</td><td role="gridcell">31/05/2023 10:00:00 a. m.</td><td role="gridcell">01/06/2023 10:00:00 a. m.</td><td role="gridcell">01/06/2023 02:00:00 p. m.</td></tr></tbody></table></div>
+</div>
+</div>
+</div>
+<div class="row" id="divAnexos" style="display:none;">
+<div class="col-md-12">
+<div class="divGridBusqueda" id="divGridAnexos" style="display:block;"></div>
+<div id="divNoInfo" style="display: none;"><label style="color:red">No hay anexos</label></div>
+</div>
+</div>
+<div class="row proyectoPleigo" id="divFechaRecepcionPropuestas">
+<div class="col-md-12">
+<div class="panel panel-success">
+<div class="panel-heading">
+<b style="font-size: 15px;">Presentación de Ofertas (Carga en el Sistema) [Tiempo del Centro: UTC -6 (UTC -5 en verano)]</b>
+</div>
+<div class="divGridBusqueda k-grid k-widget" data-role="grid" id="divFechasRecepProp" style="display:block;"><table class="k-selectable" data-role="selectable" role="grid"><colgroup><col style="width:33%"/><col style="width:33%"/><col style="width:33%"/></colgroup><thead class="k-grid-header" role="rowgroup"><tr role="row"><th class="k-header" data-field="fechaInicio" data-role="columnsorter" data-title="Fecha Inicio" role="columnheader"><a class="k-link" href="#">Fecha Inicio</a></th><th class="k-header" data-field="fechaFin" data-role="columnsorter" data-title="Fecha Fin" role="columnheader"><a class="k-link" href="#">Fecha Fin</a></th><th class="k-header" data-field="" data-title="Archivo de Financiamiento" role="columnheader">Archivo de Financiamiento</th></tr></thead><tbody role="rowgroup"><tr data-uid="3baab4d8-a7c7-45e5-a4cb-52b2943cd2d6" role="row"><td role="gridcell" style="text-align: center !important;">01/06/2023 14:00 hrs</td><td role="gridcell" style="text-align: center !important;">07/06/2023 08:00 hrs</td><td role="gridcell" style="text-align: center !important;">No</td></tr></tbody></table></div>
+</div>
+</div>
+</div>
+<div class="row proyectoPleigo">
+<div class="col-md-12">
+<div class="panel panel-success">
+<div class="panel-heading">
+<b style="font-size:15px;">Apertura de Ofertas Técnicas [Tiempo del Centro: UTC -6 (UTC -5 en verano)]</b>
+</div>
+<table class="table table-striped fixed">
+<tbody>
+<tr>
+<td class="col-md-6 derecha">
+<label class="form-label" style="font-size:11px;">Fecha de Apertura de Ofertas Técnicas</label>
+</td>
+<td class="col-md-6">
+                                07/06/2023 08:00 hrs
+                            </td>
+</tr>
+<tr>
+<td class="derecha">
+<label class="form-label" style="font-size:11px">Lugar de Apertura de Ofertas Económicas</label>
+</td>
+<td>
+                                ELECTRÓNICA
+                            </td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="row" id="divPrecisionesTecnicas" style="display:none;">
+<div class="col-md-12">
+<div class="panel panel-success">
+<div class="panel-heading">
+<b style="font-size:15px;">Precisiones Técnicas [Tiempo del Centro: UTC -6 (UTC -5 en verano)]</b>
+</div>
+<div class="panel-body">
+<div id="divGridPT"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="row proyectoPleigo">
+<div class="col-md-12">
+<div class="panel panel-success">
+<div class="panel-heading">
+<b style="font-size:15px;">Apertura de Ofertas Económicas [Tiempo del Centro: UTC -6 (UTC -5 en verano)]</b>
+</div>
+<table class="table table-striped fixed">
+<tbody>
+<tr>
+<td class="col-md-6 derecha">
+<label class="form-label" style="font-size:11px">Fecha de Apertura de Ofertas Económicas</label>
+</td>
+<td class="col-md-6">
+                                09/06/2023 10:00 hrs
+                            </td>
+</tr>
+<tr>
+<td class="derecha">
+<label class="form-label" style="font-size:11px">Lugar de Apertura de Ofertas Económicas</label>
+</td>
+<td>
+                                ELECTRÓNICA
+                            </td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="row" id="divPrecisionesEconomicas" style="display:none;">
+<div class="col-md-12">
+<div class="panel panel-success">
+<div class="panel-heading">
+<b style="font-size:15px;">Precisiones Económicas [Tiempo del Centro: UTC -6 (UTC -5 en verano)]</b>
+</div>
+<div class="panel-body">
+<div id="divGridPE"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="row" id="divSubastas" style="display:none;">
+<div class="col-md-12">
+<div class="panel panel-success">
+<div class="panel-heading">
+<b style="font-size:15px;">Subastas [Tiempo del Centro: UTC -6 (UTC -5 en verano)]</b>
+</div>
+<div class="divGridBusqueda" id="subastas" style="display:block;"></div>
+</div>
+</div>
+</div>
+<div class="row" id="divOtros" style="display:none;">
+<div class="col-md-12">
+<div class="panel panel-success">
+<div class="panel-heading">
+<b style="font-size:15px;">Otros [Tiempo del Centro: UTC -6 (UTC -5 en verano)]</b>
+</div>
+<div class="divGridBusqueda" id="otros" style="display:block;"></div>
+</div>
+</div>
+</div>
+<div class="row proyectoPleigo">
+<div class="col-md-12">
+<div class="panel panel-info">
+<div class="panel-heading">
+<b>Anexos de Suspensión</b>
+</div>
+<table class="table table-striped fixed">
+<thead>
+<tr>
+<th style="width:30%;">
+                            Archivo
+                        </th>
+<th style="width:40%;">
+                            Descripción
+                        </th>
+<th style="width:20%;">
+                            Fecha de publicación
+                        </th>
+<th style="width:10%;">
+                            Descargar
+                        </th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="row proyectoPleigo">
+<div class="col-md-12">
+<div class="panel panel-success">
+<div class="panel-heading">
+<b style="font-size:15px;">Fallo [Tiempo del Centro: UTC -6 (UTC -5 en verano)]</b>
+</div>
+<table class="table table-striped fixed">
+<tbody>
+<tr>
+<td class="col-md-6 derecha">
+<label class="form-label" style="font-size:11px;">Fecha de Fallo</label>
+</td>
+<td class="col-md-6">
+                                12/06/2023 10:00 hrs
+                            </td>
+</tr>
+<tr>
+<td class="derecha">
+<label class="form-label" style="font-size:11px;">Lugar Fallo</label>
+</td>
+<td>
+                                ELECTRÓNICA
+                            </td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="row proyectoPleigo" id="divResumenFallo" style="display: none;">
+<div class="col-md-12">
+<div class="panel panel-info">
+<div class="panel-heading">
+<b>Resumen del Fallo</b>
+</div>
+<div class="panel-body">
+<div class="divGridBusqueda" id="divGridPartidasResumen"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="row">
+<div class="col-md-12">
+<div class="panel panel-info">
+<div class="panel-heading">
+<b>Anexos de Diferimiento</b>
+</div>
+<table class="table table-striped fixed">
+<thead>
+<tr>
+<th style="width:15%">
+                                Etapa
+                            </th>
+<th style="width:15%;">
+                                Archivo
+                            </th>
+<th style="width:40%;">
+                                Descripción
+                            </th>
+<th style="width:20%;">
+                                Fecha de publicación
+                            </th>
+<th style="width:10%;">
+                                Descargar
+                            </th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<center>
+<div class="row">
+<div class="col-md-12">
+<a class="btn botonNaranja" href="#" onclick="return Participar();">Deseo Participar Como Concursante</a>
+</div>
+</div>
+</center>
+<div class="modal" id="divLoginProveedor" style="display:none;">
+<div class="modal-content" style="width:550px;">
+<div class="panel panel-success">
+<div class="panel-heading">
+                    Inicio de Sesión
+                    <span class="close" onclick="OcultarVentana('divLoginProveedor')">×</span>
+</div>
+<div class="panel-body">
+<div class="form-element">
+<label class="form-label" for="form-name">Correo Electrónico</label>
+<input class="form-control" id="form-name" placeholder="Cuenta de correo para acceso al sistema" type="email"/>
+</div>
+<br/>
+<div class="form-element">
+<label class="form-label" for="form-password">Contraseña</label>
+<input class="form-control" id="form-password" placeholder="Contraseña" type="password"/>
+</div>
+<br/>
+<div class="form-buttons">
+<a class="btn botonNaranja" href="#" onclick="return VerificarSesion();">Ingresar</a> <button class="btn btn-success" id="newProvd"><span class="glyphicon glyphicon glyphicon-circle-arrow-up"></span> Inscripción nuevo proveedor/contratista</button>
+</div>
+<br/>
+<div class="form-buttons">
+<label>Para el funcionamiento del módulo de concursantes debes ocupar Google Chrome ó Mozilla Firefox, los cuales puedes descargar de la siguiente liga:</label>
+<br/>
+<a href="https://www.google.com.mx/chrome/browser/desktop/">Descargar Google Chrome Versión 53 o Superior</a>
+<br/><br/>
+<a href="https://www.mozilla.org/es-MX/firefox/new/"> Descargar Mozilla Firefox Versión 49 o Superior</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="form-element" id="divCompleto">
+<div id="ddCompleto" style="text-align:justify">
+</div>
+</div>
+<br/>
+<br/>
+<div class="modal" id="divDetallePrecision" style="display:none;">
+<div class="modal-content" style="width:500px;max-height:400px;">
+<div class="panel panel-success">
+<div class="panel-heading">
+                Detalle de la Precisión
+                <span class="close" onclick="OcultarVentana('divDetallePrecision')">×</span>
+</div>
+<div class="panel-body" style="max-height:395px;overflow-y:auto;">
+<div class="form-group">
+<label class="control-label" for="txtFechaSolicitudD">Fecha de Solicitud</label>
+<input class="form-control" id="txtFechaSolicitudD" readonly="" type="text"/>
+</div>
+<div class="form-group">
+<label class="control-label" for="txtDescripcionD">Descripción</label>
+<textarea class="form-control" id="txtDescripcionD" readonly="" rows="20" style="height:80px;"></textarea>
+</div>
+<div class="form-group">
+<label class="control-label" for="txtProveedorD">Solicitada A:</label>
+<input class="form-control" id="txtProveedorD" readonly="" type="text"/>
+</div>
+<div class="form-group">
+<label class="control-label" for="txtFechaLimiteD">Fecha Límite de Atención:</label>
+<input class="form-control" id="txtFechaLimiteD" readonly="" type="text"/>
+</div>
+<div class="panel panel-info">
+<div class="panel-heading">
+<b>Respuestas</b>
+</div>
+<table class="table" id="tblRespuestasPrecision">
+<thead>
+<tr>
+<th>
+                                    Fecha de Respuesta
+                                </th>
+<th>
+                                    Anexo
+                                </th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+<div id="divSinRespuestas" style="display:none"><label class="control-label text-danger">Sin respuesta</label></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<form action="/Aplicaciones/NCFE/Concursos/Procedure/Details" method="post"><input name="__RequestVerificationToken" type="hidden" value="nC9YTlG-9IaIdXveqvoq6L4FSh_zXCSz3eRlU9IBci47VlRSHTR2fnvAH-LGLsKHgh5zCC-RJszFQffYBdQTDworBoc1"/> <a href="/Aplicaciones/NCFE/Concursos/">
+<span class="glyphicon glyphicon-home"></span>
+        Regresar
+    </a>
+</form>
+</div>
+</div>
+<div class="clearfix"></div>
+<div id="UltimaModificacion"></div>
+<div id="windowError"></div>
+<div class="divLoad" id="divLoader" style="display: none;">
+<div>
+<img class="centerLoading" src="/Aplicaciones/NCFE/Concursos/Content/img/Loading.gif" tyle="z-index:1050;" width="300"/>
+<label class="lblLoading">Cargando...</label>
+</div>
+</div>
+<div style="text-align:center;font-weight:bold;">
+            V.3.1.0.4
+        </div>
+<div> </div>
+<div id="Footer">
+<!-- Footer
+============================================= -->
+<footer class="dark" id="footer">
+<div class="container">
+<!-- Footer Widgets
+        ============================================= -->
+<div class="footer-widgets-wrap clearfix">
+<div class="col_three_fourth">
+<div class="col_one_fourth">
+<div class="widget clearfix">
+<img alt="" class="footer-logo" src="https://www.cfe.mx/cdn/2019/assets/images/footer-widget-logo.png"/>
+<div style="background: url('https://www.cfe.mx/cdn/2019/assets/images/world-map.png') no-repeat center center; background-size: 100%;">
+<address>
+<strong>Oficinas Nacionales:</strong><br/>
+                                Av. Paseo de la Reforma 164,<br/>
+                                Col. Juárez, C.P. 06600,<br/>
+                                Ciudad de México. México<br/>
+				Contacto: 55 5229 4400<br/>
+</address>
+<br/>
+</div>
+</div>
+</div>
+<div class="col_two_fifth">
+<div class="widget widget_links clearfix">
+<h4>Ligas de interés</h4>
+<ul>
+<li><a href="https://www.cfe.mx/nuestraempresa/Pages/historia.aspx">¿Quiénes somos?</a></li>
+<li><a href="https://www.cfe.mx/estructura/Pages/default.aspx">Estructura CFE</a></li>
+<li><a href="https://www.cfe.mx/transparencia_etica/Pages/default.aspx">Transparencia y Ética</a></li>
+<li><a href="https://www.cfe.mx/transparencia_etica/transparencia/Pages/datos_personales.aspx">Protección de Datos Personales</a></li>
+<li><a href="https://www.cfe.mx/unidaddegenero/Pages/default.aspx">Unidad de Género</a></li>
+<li><a href="https://www.cfe.mx/concursoscontratos/Pages/default.aspx">Concursos y Contratos</a></li>
+</ul>
+</div>
+</div>
+<div class="col_one_fourth">
+<div class="widget clearfix">
+<a href="https://www.plataformadetransparencia.org.mx/" target="_blank"><img src="https://app.cfe.mx/cdn/2019/assets/images/pnt.png" width="100%"/></a><br/><br/>
+<a href="http://consultapublicamx.inai.org.mx:8080/vut-web/?idSujetoObigadoParametro=77&amp;idEntidadParametro=33&amp;idSectorParametro=21http://consultapublicamx.inai.org.mx:8080/vut-web/?idSujetoObigadoParametro=77&amp;idEntidadParametro=33&amp;idSectorParametro=21http://consultapublicamx.inai.org.mx:8080/vut-web/?idSujetoObigadoParametro=77&amp;idEntidadParametro=33&amp;idSectorParametro=21" target="_blank"><img src="https://app.cfe.mx/cdn/2019/assets/images/cot.png" width="100%"/></a>
+</div>
+<div class="widget widget_links clearfix">
+<ul>
+<li><a href="https://www.cfe.mx/transparencia_etica/transparencia/pages/transparencia.aspx">Sistemas de Portales de Obligaciones de Transparencia de Fideicomisos</a></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="col_one_fourth col_last">
+<div class="widget widget_links clearfix">
+<h4>
+<span>
+                            Atención al cliente:
+                            <br/>Marca 071
+                            <br/>Twitter: <a href="https://twitter.com/cfe_contigo">@CFE_Contigo</a>
+</span>
+</h4>
+<h4>Descarga CFEContigo</h4>
+<div class="col_one_third">
+<div class="feature-box fbox-center fbox-effect">
+<div class="stores">
+<a href="https://apps.apple.com/mx/app/cfe-contigo/id1354232135" target="_blank"><img src="https://www.cfe.mx/cdn/2019/assets/images/applestore.png"/></a>
+</div>
+<h5><a href="https://apps.apple.com/mx/app/cfe-contigo/id1354232135" target="_blank">App Store</a></h5>
+</div>
+</div>
+<div class="col_one_third">
+<div class="feature-box fbox-center fbox-effect">
+<div class="stores">
+<a href="https://play.google.com/store/apps/details?id=mx.com.cfe.cfecontigo&amp;hl=es_MX" target="_blank"><img src="https://www.cfe.mx/cdn/2019/assets/images/gplay.png"/></a>
+</div>
+<h5><a href="https://play.google.com/store/apps/details?id=mx.com.cfe.cfecontigo&amp;hl=es_MX" target="_blank">Google Play</a></h5>
+</div>
+</div>
+<div class="col_one_third col_last">
+<div class="feature-box fbox-center fbox-effect">
+<div class="stores">
+<a href="https://appgallery5.huawei.com/#/app/C101693327" target="_blank"><img src="https://www.cfe.mx/cdn/2019/assets/images/appgallery.png"/></a>
+</div>
+<h5><a href="https://appgallery5.huawei.com/#/app/C101693327" target="_blank">AppGallery</a></h5>
+</div>
+</div>
+</div>
+<div class="widget widget_links clearfix" style="margin-top:0px">
+<h4>Descarga APP CFE Proveedores</h4>
+<div class="col_one_third">
+<div class="feature-box fbox-center fbox-effect">
+<div class="stores">
+<a href="https://apps.apple.com/mx/app/cfe-proveedores/id1558205458" target="_blank"><img src="https://www.cfe.mx/cdn/2019/assets/images/applestore.png"/></a>
+</div>
+<h5><a href="https://apps.apple.com/mx/app/cfe-proveedores/id1558205458" target="_blank">App Store</a></h5>
+</div>
+</div>
+<div class="col_one_third">
+<div class="feature-box fbox-center fbox-effect">
+<div class="stores">
+<a href="https://play.google.com/store/apps/details?id=mx.com.cfe.proveedores&amp;hl=es_MX" target="_blank"><img src="https://www.cfe.mx/cdn/2019/assets/images/gplay.png"/></a>
+</div>
+<h5><a href="https://play.google.com/store/apps/details?id=mx.com.cfe.proveedores&amp;hl=es_MX" target="_blank">Google Play</a></h5>
+</div>
+</div>
+<div class="col_one_third col_last">
+<div class="feature-box fbox-center fbox-effect">
+<div class="stores">
+<a href="https://appgallery.huawei.com/#/app/C104017977" target="_blank"><img src="https://www.cfe.mx/cdn/2019/assets/images/appgallery.png"/></a>
+</div>
+<h5><a href="https://appgallery.huawei.com/#/app/C104017977" target="_blank">AppGallery</a></h5>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- .footer-widgets-wrap end -->
+</div>
+<!-- Copyrights
+    ============================================= -->
+<div id="copyrights">
+<div class="container clearfix">
+<div class="col_half">
+<a href="https://home.inai.org.mx/" target="_blank">INAI</a> / <a href="https://www.infomex.org.mx/gobiernofederal/home.action" target="_blank">INFOMEX</a><br/>
+<div class="copyright-links">© Derechos reservados. <a href="https://www.cfe.mx/Pages/TerminosyCondiciones.aspx">Términos y condiciones</a> / <a href="https://www.cfe.mx/Pages/Politica_de_privacidad.aspx">Aviso de privacidad</a></div>
+</div>
+<div class="col_half col_last tright">
+<div class="fright clearfix">
+<a class="social-icon si-small si-borderless si-facebook" href="https://www.facebook.com/CFENacional" target="_blank">
+<i class="icon-facebook"></i>
+<i class="icon-facebook"></i>
+</a>
+<a class="social-icon si-small si-borderless si-twitter" href="https://twitter.com/cfemx" target="_blank">
+<i class="icon-twitter"></i>
+<i class="icon-twitter"></i>
+</a>
+<a class="social-icon si-small si-borderless si-youtube" href="https://www.youtube.com/channel/UC5YjgDMZ08jSn4LxPom7O2Q/videos" target="_blank">
+<i class="icon-youtube-play"></i>
+<i class="icon-youtube-play"></i>
+</a>
+<a class="social-icon si-small si-borderless si-instagram" href="https://www.instagram.com/cfe_nacional/" target="_blank">
+<i class="icon-instagram2"></i>
+<i class="icon-instagram2"></i>
+</a>
+</div>
+<div class="clear"></div>
+</div>
+</div>
+</div>
+<!-- #copyrights end -->
+</footer>
+<!-- #footer end -->
+</div>
+</div>
+</body></html>
